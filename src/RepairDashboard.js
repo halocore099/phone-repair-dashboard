@@ -28,21 +28,25 @@ const RepairDashboard = () => {
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
         const repairResponse = await axios.get(`http://localhost:3001/devices/${deviceId}/repairs`);
-        return {
-          ...device,
-          repairs: repairResponse.data
-        };
+        return repairResponse.data.map(repair => ({
+          ID: device.device_id,
+          'Device Name': device.device_name,
+          Brand: device.brand,
+          'Repair Type': repair.repair_type,
+          Price: repair.price
+        }));
       })
     );
   
+    const flattenedData = devicesWithRepairs.flat();
     const csvContent = [
-      ['ID', 'Device Name', 'Brand', 'Repair Types', 'Prices'].join(','),
-      ...devicesWithRepairs.map(device => [
-        device.device_id,
-        device.device_name,
-        device.brand,
-        device.repairs.map(r => r.repair_type).join(';'),
-        device.repairs.map(r => r.price).join(';')
+      ['ID', 'Device Name', 'Brand', 'Repair Type', 'Price'].join(','),
+      ...flattenedData.map(row => [
+        row.ID,
+        row['Device Name'],
+        row.Brand,
+        row['Repair Type'],
+        row.Price
       ].join(','))
     ].join('\n');
   
@@ -57,36 +61,48 @@ const RepairDashboard = () => {
 
   const handleExportExcel = async () => {
     if (selectedDevices.length === 0) return;
-
+  
     const devicesWithRepairs = await Promise.all(
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
         const repairResponse = await axios.get(`http://localhost:3001/devices/${deviceId}/repairs`);
-        return {
-          ...device,
-          repairs: repairResponse.data
-        };
+        return repairResponse.data.map(repair => ({
+          ID: device.device_id,
+          'Device Name': device.device_name,
+          Brand: device.brand,
+          'Repair Type': repair.repair_type,
+          Price: parseFloat(repair.price).toFixed(2)
+        }));
       })
     );
-
-    const excelData = devicesWithRepairs.map(device => ({
-      ID: device.device_id,
-      'Device Name': device.device_name,
-      Brand: device.brand,
-      'Repair Types': device.repairs.map(r => r.repair_type).join('; '),
-      Prices: device.repairs.map(r => `${r.price}`).join('; ')
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
+  
+    const flattenedData = devicesWithRepairs.flat();
+    
+    // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Devices");
-
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData, {
+      header: ['ID', 'Device Name', 'Brand', 'Repair Type', 'Price']
+    });
+  
+    // Format the Price column to show two decimal places
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    const priceCol = 4; // 0-based index for Price column
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: priceCol })];
+      if (cell && cell.v) {
+        cell.z = '$#,##0.00'; // Apply currency format
+      }
+    }
+  
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Repairs");
+  
+    // Generate filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     XLSX.writeFile(workbook, `device-repairs-${timestamp}.xlsx`);
   };
-  
 
-  const loadDevices = async () => {
+    const loadDevices = async () => {
     try {
       const response = await axios.get('http://localhost:3001/devices');
       setDevices(response.data);
