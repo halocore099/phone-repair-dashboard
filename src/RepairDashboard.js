@@ -130,22 +130,68 @@ const RepairDashboard = () => {
       device.device_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (brandFilter ? device.brand === brandFilter : true)
   );
+    const [adminEmail, setAdminEmail] = useState('');
+    const [adminPassword, setAdminPassword] = useState('');
+    const [showAdminModal, setShowAdminModal] = useState(false);
 
-  const handleDeleteDevice = async (deviceId) => {
-    try {
-      const confirmDelete = window.confirm('Are you sure you want to delete this device and all its repairs?');
+    const handleDeleteDevice = async (deviceId) => {
+      try {
+        const confirmDelete = window.confirm('Are you sure you want to delete this device and all its repairs?');
   
-      if (confirmDelete) {
-        await axios.delete(`http://localhost:3001/devices/${deviceId}`);
+        if (confirmDelete) {
+          setShowAdminModal(true);
+          setSelectedDevice({ device_id: deviceId });
+        }
+      } catch (error) {
+        console.error('Error deleting device:', error);
+        alert('Failed to delete device. Please try again.');
+      }
+    };
+
+    const confirmDeviceDeletion = async () => {
+      try {
+        await axios.delete(`http://localhost:3001/devices/${selectedDevice.device_id}`, {
+          headers: {
+            adminEmail,
+            adminPassword
+          }
+        });
         const response = await axios.get('http://localhost:3001/devices');
         setDevices(response.data);
+    
+        setShowAdminModal(false);
+        setAdminEmail('');
+        setAdminPassword('');
+      } catch (error) {
+        console.error('Error deleting device:', error);
+        alert(error.response?.data?.error || 'Failed to delete device');
       }
-    } catch (error) {
-      console.error('Error deleting device:', error);
-      alert('Failed to delete device. Please try again.');
-    }
-  };
+    };
 
+    {showAdminModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg">
+          <h2 className="text-xl mb-4">Admin Authentication</h2>
+          <Input
+            placeholder="Admin Email"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            className="mb-2"
+          />
+          <Input
+            type="password"
+            placeholder="Admin Password"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            className="mb-4"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowAdminModal(false)}>Cancel</Button>
+            <Button onClick={confirmDeviceDeletion}>Confirm Delete</Button>
+          </div>
+        </div>
+      </div>
+    )}
   const handleAddDevice = async () => {
     try {
       await axios.post('http://localhost:3001/devices', newDevice);
@@ -549,6 +595,31 @@ const RepairDashboard = () => {
         )}
         {isEditModalOpen && selectedDevice && (
           <EditModal device={selectedDevice} onClose={() => setIsEditModalOpen(false)} />
+        )}
+        
+        {showAdminModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg">
+              <h2 className="text-xl mb-4">Admin Authentication</h2>
+              <Input
+                placeholder="Admin Email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                className="mb-2"
+              />
+              <Input
+                type="password"
+                placeholder="Admin Password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="mb-4"
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAdminModal(false)}>Cancel</Button>
+                <Button onClick={confirmDeviceDeletion}>Confirm Delete</Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     );
