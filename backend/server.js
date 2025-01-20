@@ -110,50 +110,72 @@ app.get('/repairtypes', (req, res) => {
 
 // Get all devices with their repairs
 app.get('/devices', (req, res) => {
-  const { search, limit = 20, offset = 0, brand } = req.query;
+  const { search, limit = 20, page = 1, brand } = req.query;
+  const offset = (page - 1) * limit;
 
+  // First query to get total count
+  let countQuery = `
+    SELECT COUNT(DISTINCT devices.device_id) as total
+    FROM devices
+    WHERE 1=1
+  `;
+
+  // Main query with pagination
   let query = `
     SELECT 
       devices.device_id, 
       devices.device_name, 
       devices.brand, 
       COUNT(device_repairs.repair_type_id) as repair_count
-    FROM 
-      devices
-    LEFT JOIN 
-      device_repairs ON devices.device_id = device_repairs.device_id
-  `;
-
-  if (search) {
-    query += ` WHERE devices.device_name LIKE ? OR devices.brand LIKE ?`;
-  }
-  if (brand) {
-    query += search ? ` AND` : ` WHERE`;
-    query += ` devices.brand = ?`;
-  }
-
-  query += ` GROUP BY 
-    devices.device_id, 
-    devices.device_name, 
-    devices.brand
-    LIMIT ? OFFSET ?
+    FROM devices
+    LEFT JOIN device_repairs ON devices.device_id = device_repairs.device_id
+    WHERE 1=1
   `;
 
   const queryParams = [];
   if (search) {
+    const searchCondition = ` AND (devices.device_name LIKE ? OR devices.brand LIKE ?)`;
+    countQuery += searchCondition;
+    query += searchCondition;
     queryParams.push(`%${search}%`, `%${search}%`);
   }
+  
   if (brand) {
+    const brandCondition = ` AND devices.brand = ?`;
+    countQuery += brandCondition;
+    query += brandCondition;
     queryParams.push(brand);
   }
-  queryParams.push(parseInt(limit), parseInt(offset));
 
-  db.query(query, queryParams, (err, results) => {
+  query += ` 
+    GROUP BY devices.device_id, devices.device_name, devices.brand
+    LIMIT ? OFFSET ?
+  `;
+
+  // Execute count query first
+  db.query(countQuery, queryParams, (err, countResults) => {
     if (err) {
-      console.error('Error fetching devices:', err);
-      return res.status(500).json({ error: 'Failed to fetch devices' });
+      return res.status(500).json({ error: 'Failed to fetch devices count' });
     }
-    res.json(results);
+
+    const totalCount = countResults[0].total;
+    
+    // Then execute main query
+    db.query(query, [...queryParams, parseInt(limit), parseInt(offset)], (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch devices' });
+      }
+      
+      res.json({
+        devices: results,
+        pagination: {
+          total: totalCount,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(totalCount / limit)
+        }
+      });
+    });
   });
 });
 
@@ -240,6 +262,39 @@ app.delete('/devices/:device_id/repairs/:repair_type_id', (req, res) => {
     });
   });
 });
+
+// Add new endpoint for mass deletion
+app.delete('/devices/mass-delete', verifyAdmin, (req, res) => {
+  const { deviceIds } = req.body;
+
+  if (!deviceIds || !Array.isArray(deviceIds) || deviceIds.length === 0) {
+    return res.status(400).json({ error: 'Device IDs array is required' });
+  }
+
+  const deleteRepairsQuery = 'DELETE FROM device_repairs WHERE device_id IN (?)';
+  const deleteDevicesQuery = 'DELETE FROM devices WHERE device_id IN (?)';
+
+  db.query(deleteRepairsQuery, [deviceIds], (deleteRepairsErr) => {
+    if (deleteRepairsErr) {
+      console.error('Error deleting device repairs:', deleteRepairsErr);
+      return res.status(500).json({ error: 'Failed to delete device repairs' });
+    }
+
+    db.query(deleteDevicesQuery, [deviceIds], (deleteDeviceErr, result) => {
+      if (deleteDeviceErr) {
+        console.error('Error deleting devices:', deleteDeviceErr);
+        return res.status(500).json({ error: 'Failed to delete devices' });
+      }
+
+      res.json({
+        message: 'Devices deleted successfully',
+        deletedCount: result.affectedRows,
+        deviceIds
+      });
+    });
+  });
+});
+
 
 // Delete a device and its associated repairs
 app.delete('/devices/:device_id', verifyAdmin, (req, res) => {
