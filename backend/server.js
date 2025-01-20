@@ -24,48 +24,55 @@ db.connect((err) => {
   }
   console.log('Connected to the database');
 });
+  const verifyAdmin = (req, res, next) => {
+    const adminEmail = req.headers['adminemail'];
+    const adminPassword = req.headers['adminpassword'];
 
-const verifyAdmin = (req, res, next) => {
-  const { adminEmail, adminPassword } = req.headers;
-
-  console.log('Received Headers:', {
-    adminEmail,
-    adminPasswordLength: adminPassword ? adminPassword.length : 'No password'
-  });
-
-  if (!adminEmail || !adminPassword) {
-    return res.status(401).json({ error: 'Admin credentials required' });
-  }
-
-  const hashedPassword = crypto.createHash('sha256').update(adminPassword).digest('hex');
-
-  console.log('Hashed Password:', hashedPassword);
-
-  const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
-
-  db.query(query, [adminEmail, hashedPassword], (err, results) => {
-    if (err) {
-      console.error('Database Query Error:', err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-
-    console.log('Query Results:', {
-      resultsCount: results.length,
-      results: results
+    console.log('Received Headers:', {
+      timestamp: new Date().toISOString(),
+      adminEmail,
+      adminPasswordLength: adminPassword?.length || 0
     });
-    
-    if (results.length === 0) {
+
+    if (!adminEmail || !adminPassword) {
       return res.status(401).json({ 
-        error: 'Invalid admin credentials',
-        details: {
-          email: adminEmail,
-          hashedPassword: hashedPassword
+        error: 'Admin credentials required',
+        missing: {
+          email: !adminEmail,
+          password: !adminPassword
         }
       });
     }
+
+    const hashedPassword = crypto.createHash('sha256').update(adminPassword).digest('hex');
+
+    console.log('Hashed Password:', hashedPassword);
+
+    const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
+
+    db.query(query, [adminEmail, hashedPassword], (err, results) => {
+      if (err) {
+        console.error('Database Query Error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      console.log('Query Results:', {
+        resultsCount: results.length,
+        results: results
+      });
     
-    next();
-  });
+      if (results.length === 0) {
+        return res.status(401).json({ 
+          error: 'Invalid admin credentials',
+          details: {
+            email: adminEmail,
+            hashedPassword: hashedPassword
+          }
+        });
+      }
+    
+      next();
+    });
 };// Endpoint to add a new repair type
 app.post('/repairtypes', (req, res) => {
   const { repair_type } = req.body;
@@ -296,31 +303,73 @@ app.get('/devices/:device_id/repairs', (req, res) => {
   });
 });
 
-// Optional: Add an endpoint to register admin
+// Add this endpoint to help with admin registration
 app.post('/register-admin', (req, res) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
-  // Hash the password
   const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+  
+  console.log('Registering admin with:', {
+    email,
+    hashedPassword
+  });
 
   const query = 'INSERT INTO admins (email, password) VALUES (?, ?)';
-
   db.query(query, [email, hashedPassword], (err, result) => {
     if (err) {
-      console.error('Error registering admin:', err);
+      console.error('Admin registration error:', err);
       return res.status(500).json({ error: 'Failed to register admin' });
     }
-
-    res.status(201).json({ message: 'Admin registered successfully' });
+    res.status(201).json({ 
+      message: 'Admin registered successfully',
+      hashedPassword // Sending back for verification
+    });
   });
 });
 
-// Start the server
+// Start the serverww
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Enhanced admin authentication endpoint
+app.post('/admin/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  console.log('Login attempt:', {
+    timestamp: new Date().toISOString(),
+    email,
+    hasPassword: !!password
+  });
+
+  const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+  const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
+
+  db.query(query, [email, hashedPassword], (err, results) => {
+    if (err) {
+      console.error('Database error during login:', {
+        error: err.message,
+        code: err.code,
+        timestamp: new Date().toISOString()
+      });
+      return res.status(500).json({
+        error: 'Login failed',
+        details: 'Database error occurred',
+        code: err.code
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({
+        error: 'Authentication failed',
+        details: 'Invalid email or password'
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Login successful',
+      adminId: results[0].id
+    });
+  });  
 });

@@ -8,6 +8,7 @@ import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
 
 const RepairDashboard = () => {
   const [devices, setDevices] = useState([]);
+  const [adminError, setAdminError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [repairTypes, setRepairTypes] = useState([]);
@@ -38,6 +39,22 @@ const RepairDashboard = () => {
       })
     );
   
+    // Add this function to help with registration
+const registerAdmin = async () => {
+  try {
+    const response = await axios.post('http://localhost:3001/register-admin', {
+      email: adminEmail,
+      password: adminPassword
+    });
+    console.log('Registration successful:', response.data);
+    // Now try the delete operation again
+    await confirmDeviceDeletion();
+  } catch (error) {
+    setAdminError('Registration failed: ' + error.response?.data?.error || error.message);
+  }
+};
+
+
     const flattenedData = devicesWithRepairs.flat();
     const csvContent = [
       ['ID', 'Device Name', 'Brand', 'Repair Type', 'Price'].join(','),
@@ -148,50 +165,79 @@ const RepairDashboard = () => {
       }
     };
 
+    // Enhanced admin authentication handling
     const confirmDeviceDeletion = async () => {
       try {
-        await axios.delete(`http://localhost:3001/devices/${selectedDevice.device_id}`, {
-          headers: {
-            adminEmail,
-            adminPassword
-          }
-        });
-        const response = await axios.get('http://localhost:3001/devices');
-        setDevices(response.data);
+        setAdminError(''); // Clear any previous errors
     
-        setShowAdminModal(false);
-        setAdminEmail('');
-        setAdminPassword('');
-      } catch (error) {
-        console.error('Error deleting device:', error);
-        alert(error.response?.data?.error || 'Failed to delete device');
-      }
-    };
+        if (!adminEmail || !adminPassword) {
+          setAdminError('Email and password are required');
+          return;
+        }
 
-    {showAdminModal && (
+        const response = await axios.delete(
+          `http://localhost:3001/devices/${selectedDevice.device_id}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'adminEmail': adminEmail,
+              'adminPassword': adminPassword
+            }
+          }
+        );
+
+        if (response.data) {
+          await loadDevices();
+          setShowAdminModal(false);
+          setAdminEmail('');
+          setAdminPassword('');
+        }
+      } catch (error) {
+        setAdminError(error.response?.data?.error || 'Authentication failed');
+        console.error('Delete Operation Failed:', {
+          timestamp: new Date().toISOString(),
+          error: error.response?.data || error.message,
+          status: error.response?.status
+        });
+      }
+    };    // Enhanced admin modal component
+    const AdminModal = () => (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white p-6 rounded-lg">
-          <h2 className="text-xl mb-4">Admin Authentication</h2>
-          <Input
-            placeholder="Admin Email"
-            value={adminEmail}
-            onChange={(e) => setAdminEmail(e.target.value)}
-            className="mb-2"
-          />
-          <Input
-            type="password"
-            placeholder="Admin Password"
-            value={adminPassword}
-            onChange={(e) => setAdminPassword(e.target.value)}
-            className="mb-4"
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowAdminModal(false)}>Cancel</Button>
-            <Button onClick={confirmDeviceDeletion}>Confirm Delete</Button>
+          <h2 className="text-xl mb-4">Admin Authentication Required</h2>
+          <div className="space-y-4">
+            <Input
+              placeholder="Admin Email"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              className="w-full"
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Admin Password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              className="w-full"
+              required
+            />
+            {adminError && (
+              <div className="text-red-500 text-sm">{adminError}</div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAdminModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={confirmDeviceDeletion}>
+                Confirm Delete
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    )}
+    );
+
+    {showAdminModal && <AdminModal />}
   const handleAddDevice = async () => {
     try {
       await axios.post('http://localhost:3001/devices', newDevice);
@@ -626,3 +672,4 @@ const RepairDashboard = () => {
   };
 
 export default RepairDashboard;
+
