@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/Card';
@@ -21,6 +21,10 @@ const RepairDashboard = () => {
     device_name: "",
     brand: ""
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   
   const handleExportCSV = async () => {
     if (selectedDevices.length === 0) return;
@@ -119,14 +123,39 @@ const registerAdmin = async () => {
     XLSX.writeFile(workbook, `device-repairs-${timestamp}.xlsx`);
   };
 
-    const loadDevices = async () => {
+  const loadDevices = async (pageNum = page) => {
     try {
-      const response = await axios.get('http://localhost:3001/devices');
-      setDevices(response.data);
+      setIsLoading(true);
+      const response = await axios.get('http://localhost:3001/devices', {
+        params: {
+          page: pageNum,
+          limit: 20,
+          search: searchTerm,
+          brand: brandFilter
+        }
+      });
+      
+      if (pageNum === 1) {
+        setDevices(response.data.devices);
+      } else {
+        setDevices(prev => [...prev, ...response.data.devices]);
+      }
+      
+      setTotalPages(response.data.pagination.totalPages);
+      setHasMore(pageNum < response.data.pagination.totalPages);
     } catch (error) {
       console.error('Error loading devices:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleScroll = useCallback((e) => {
+    const bottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+    if (bottom && !isLoading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  }, [isLoading, hasMore]);
 
   const handleDeviceSelect = (deviceId) => {
     setSelectedDevices(prev => {
@@ -139,8 +168,8 @@ const registerAdmin = async () => {
   
 
   useEffect(() => {
-    loadDevices();
-  }, []);
+    loadDevices(page);
+  }, [page, searchTerm, brandFilter]);
 
   const filteredDevices = devices.filter(
     device =>
@@ -165,42 +194,53 @@ const registerAdmin = async () => {
       }
     };
 
+    const handleMassDelete = async () => {
+      if (selectedDevices.length === 0) return;
+      
+      const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedDevices.length} selected devices and their repairs?`);
+      
+      if (confirmDelete) {
+        setShowAdminModal(true);
+      }
+    };
+    
+
     // Enhanced admin authentication handling
     const confirmDeviceDeletion = async () => {
       try {
-        setAdminError(''); // Clear any previous errors
-    
+        setAdminError('');
+
         if (!adminEmail || !adminPassword) {
           setAdminError('Email and password are required');
           return;
         }
 
-        const response = await axios.delete(
-          `http://localhost:3001/devices/${selectedDevice.device_id}`,
-          {
+        await Promise.all(selectedDevices.map(deviceId => 
+          axios.delete(`http://localhost:3001/devices/${deviceId}`, {
             headers: {
               'Content-Type': 'application/json',
               'adminEmail': adminEmail,
               'adminPassword': adminPassword
             }
-          }
-        );
+          })
+        ));
 
-        if (response.data) {
-          await loadDevices();
-          setShowAdminModal(false);
-          setAdminEmail('');
-          setAdminPassword('');
-        }
+        await loadDevices();
+        setShowAdminModal(false);
+        setAdminEmail('');
+        setAdminPassword('');
+        setSelectedDevices([]);
+      
       } catch (error) {
         setAdminError(error.response?.data?.error || 'Authentication failed');
-        console.error('Delete Operation Failed:', {
+        console.error('Mass Delete Operation Failed:', {
           timestamp: new Date().toISOString(),
           error: error.response?.data || error.message,
           status: error.response?.status
         });
       }
-    };    // Enhanced admin modal component
+    };
+    // Enhanced admin modal component
     const AdminModal = () => (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white p-6 rounded-lg">
@@ -237,6 +277,7 @@ const registerAdmin = async () => {
       </div>
     );
 
+    
     {showAdminModal && <AdminModal />}
   const handleAddDevice = async () => {
     try {
@@ -421,66 +462,185 @@ const registerAdmin = async () => {
       }
     };
   
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+     return (
+    <div className="p-4 space-y-4">
+      <Card>
+        <CardHeader>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">
-              {device.device_name} - {device.brand} (ID: {device.device_id})
-            </h2>
-            <Button variant="ghost" onClick={onClose}>×</Button>
+            <CardTitle>Phone Repair Management Dashboard</CardTitle>
+            <Button
+              onClick={() => setShowAddDevice(!showAddDevice)}
+              className="flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Device
+            </Button>
           </div>
-          <div className="space-y-4">
-            {editedRepairs.map((repair, index) => (
-              <div key={repair.repair_type_id} className="flex items-center gap-4">
-                <span className="min-w-[200px]">{repair.repair_type}</span>
-                <Input
-                  type="number"
-                  value={repair.price}
-                  onChange={(e) => {
-                    const newRepairs = [...editedRepairs];
-                    newRepairs[index] = {
-                      ...repair,
-                      price: parseFloat(e.target.value) || 0
-                    };
-                    setEditedRepairs(newRepairs);
-                  }}
-                  className="w-32"
-                />
-                <Button variant="outline" onClick={() => handleRemoveRepair(device.device_id, repair.repair_type_id)}>
-                  Remove
-                </Button>
-              </div>
-            ))}
-  
-            <div className="flex items-center gap-4">
-              <select
-                value={selectedRepairType ? selectedRepairType.repair_type_id : ''}
-                onChange={(e) => {
-                  const selectedType = repairTypes.find(r => r.repair_type_id === parseInt(e.target.value));
-                  setSelectedRepairType(selectedType);
-                }}
-                className="border p-2"
-              >
-                <option value="">Select Repair Type</option>
-                {repairTypes.map((repair) => (
-                  <option key={repair.repair_type_id} value={repair.repair_type_id}>
-                    {repair.repair_type} - ${repair.price}
-                  </option>
-                ))}
-              </select>
-              <Button onClick={handleAddRepair}>Add Repair</Button>
+          <div className="flex gap-4">
+            <Input
+              placeholder="Search devices..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <select
+              value={brandFilter}
+              onChange={(e) => setBrandFilter(e.target.value)}
+              className="border p-2 rounded"
+            >
+              <option value="">All Brands</option>
+              {[...new Set(filteredDevices.map(device => device.brand))].map(brand => (
+                brand && <option key={brand} value={brand}>{brand}</option>
+              ))}
+            </select>
+          </div>
+        </CardHeader>
+
+        {selectedDevices.length > 0 && (
+          <div className="bg-gray-50 p-4 mb-4 flex items-center justify-between">
+            <span className="text-sm text-gray-700">
+              {selectedDevices.length} device(s) selected
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleExportCSV}>
+                Export CSV
+              </Button>
+              <Button variant="outline" onClick={handleExportExcel}>
+                Export Excel
+              </Button>
+              <Button variant="destructive" onClick={handleMassDelete}>
+                <Trash2 size={16} />
+                Delete Selected
+              </Button>
             </div>
-  
-            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+          </div>
+        )}
+
+        <CardContent>
+          {showAddDevice && (
+            <div className="mb-4 flex gap-2">
+              <Input
+                placeholder="Device Name"
+                value={newDevice.device_name}
+                onChange={(e) => setNewDevice({ ...newDevice, device_name: e.target.value })}
+              />
+              <Input
+                placeholder="Brand"
+                value={newDevice.brand}
+                onChange={(e) => setNewDevice({ ...newDevice, brand: e.target.value })}
+              />
+              <Button onClick={handleAddDevice}>Save Device</Button>
+            </div>
+          )}
+
+          <div className="overflow-x-auto max-h-[70vh]" onScroll={handleScroll}>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                    <input
+                      type="checkbox"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDevices(filteredDevices.map(d => d.device_id))
+                        } else {
+                          setSelectedDevices([])
+                        }
+                      }}
+                      checked={selectedDevices.length === filteredDevices.length}
+                    />
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">ID</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Device</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Brand</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Repairs</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredDevices.map((device) => (
+                  <tr key={device.device_id}>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={selectedDevices.includes(device.device_id)}
+                        onChange={() => handleDeviceSelect(device.device_id)}
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{device.device_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{device.device_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{device.brand}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {device.repair_count !== undefined
+                        ? `${device.repair_count} Repair(s)`
+                        : 'No repairs'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDevice(device);
+                          setIsViewModalOpen(true);
+                        }}
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDevice(device);
+                          setIsEditModalOpen(true);
+                        }}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button variant="outline" onClick={() => handleDeleteDevice(device.device_id)}>
+                        <Trash2 size={16} />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {isLoading && <div className="text-center py-4">Loading more devices...</div>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {isViewModalOpen && selectedDevice && (
+        <ViewModal device={selectedDevice} onClose={() => setIsViewModalOpen(false)} />
+      )}
+      {isEditModalOpen && selectedDevice && (
+        <EditModal device={selectedDevice} onClose={() => setIsEditModalOpen(false)} />
+      )}
+
+      {showAdminModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-xl mb-4">Admin Authentication</h2>
+            <Input
+              placeholder="Admin Email"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              className="mb-2"
+            />
+            <Input
+              type="password"
+              placeholder="Admin Password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              className="mb-4"
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAdminModal(false)}>Cancel</Button>
+              <Button onClick={confirmDeviceDeletion}>Confirm Delete</Button>
             </div>
           </div>
         </div>
-      </div>
-    );
-  };
+      )}
+    </div>
+  );
+};
     
     return (
       <div className="p-4 space-y-4">
@@ -536,6 +696,14 @@ const registerAdmin = async () => {
                 >
                   Export Excel
                 </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleMassDelete}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Delete Selected
+                </Button>
               </div>
             </div>
           )}
@@ -556,10 +724,13 @@ const registerAdmin = async () => {
                 <Button onClick={handleAddDevice}>Save Device</Button>
               </div>
             )}
-          
-            <div className="overflow-x-auto">
+
+            <div 
+              className="overflow-x-auto max-h-[70vh]" 
+              onScroll={handleScroll}
+            >
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
                       <input
@@ -626,12 +797,16 @@ const registerAdmin = async () => {
                         >
                           <Trash2 size={16} />
                         </Button>
-
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {isLoading && (
+                <div className="text-center py-4">
+                  Loading more devices...
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -672,3 +847,4 @@ const registerAdmin = async () => {
   };
 
 export default RepairDashboard;
+
