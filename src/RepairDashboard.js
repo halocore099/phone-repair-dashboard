@@ -164,34 +164,44 @@ const registerAdmin = async () => {
         alert('Failed to delete device. Please try again.');
       }
     };
-
     // Enhanced admin authentication handling
     const confirmDeviceDeletion = async () => {
       try {
-        setAdminError(''); // Clear any previous errors
-    
+        setAdminError('');
+
         if (!adminEmail || !adminPassword) {
           setAdminError('Email and password are required');
           return;
         }
 
-        const response = await axios.delete(
-          `http://localhost:3001/devices/${selectedDevice.device_id}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'adminEmail': adminEmail,
-              'adminPassword': adminPassword
-            }
-          }
-        );
+        const headers = {
+          'Content-Type': 'application/json',
+          'adminEmail': adminEmail,
+          'adminPassword': adminPassword
+        };
+
+        let response;
+        if (selectedDevices.length > 0) {
+          response = await axios.delete(`http://localhost:3001/devices/batch`, {
+            data: { deviceIds: selectedDevices },
+            headers
+          });
+        } else {
+          response = await axios.delete(
+            `http://localhost:3001/devices/${selectedDevice.device_id}`,
+            { headers }
+          );
+        }
 
         if (response.data) {
           await loadDevices();
           setShowAdminModal(false);
           setAdminEmail('');
           setAdminPassword('');
+          setSelectedDevices([]);
+          setSelectedDevice(null);
         }
+
       } catch (error) {
         setAdminError(error.response?.data?.error || 'Authentication failed');
         console.error('Delete Operation Failed:', {
@@ -200,7 +210,10 @@ const registerAdmin = async () => {
           status: error.response?.status
         });
       }
-    };    // Enhanced admin modal component
+    };
+    
+    
+    // Enhanced admin modal component
     const AdminModal = () => (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="bg-white p-6 rounded-lg">
@@ -268,6 +281,16 @@ const registerAdmin = async () => {
     }
   };
 
+
+  const handleMassDelete = async () => {
+    if (selectedDevices.length === 0) return;
+    
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedDevices.length} devices and their repairs?`);
+    
+    if (confirmDelete) {
+      setShowAdminModal(true);
+    }
+  };
   
 
   const handleRemoveRepair = async (deviceId, repairId) => {
@@ -534,6 +557,13 @@ const registerAdmin = async () => {
                     className="flex items-center gap-2"
                 >
                   Export Excel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleMassDelete}
+                  className="flex items-center gap-2"
+                >
+                  Delete Selected
                 </Button>
               </div>
             </div>

@@ -241,6 +241,36 @@ app.delete('/devices/:device_id/repairs/:repair_type_id', (req, res) => {
   });
 });
 
+app.delete('/devices/batch', verifyAdmin, (req, res) => {
+  const { deviceIds } = req.body;
+  
+  if (!deviceIds || !Array.isArray(deviceIds) || deviceIds.length === 0) {
+    return res.status(400).json({ error: 'Valid device IDs array is required' });
+  }
+
+  // First delete repairs
+  const deleteRepairsQuery = 'DELETE FROM device_repairs WHERE device_id IN (?)';
+  db.query(deleteRepairsQuery, [deviceIds], (deleteRepairsErr) => {
+    if (deleteRepairsErr) {
+      console.error('Error deleting repairs:', deleteRepairsErr);
+      return res.status(500).json({ error: 'Failed to delete device repairs' });
+    }
+
+    // Then delete devices
+    const deleteDevicesQuery = 'DELETE FROM devices WHERE device_id IN (?)';
+    db.query(deleteDevicesQuery, [deviceIds], (deleteDevicesErr, result) => {
+      if (deleteDevicesErr) {
+        console.error('Error deleting devices:', deleteDevicesErr);
+        return res.status(500).json({ error: 'Failed to delete devices' });
+      }
+
+      res.json({
+        message: 'Devices deleted successfully',
+        deletedCount: result.affectedRows
+      });
+    });
+  });
+});
 // Delete a device and its associated repairs
 app.delete('/devices/:device_id', verifyAdmin, (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
@@ -374,27 +404,3 @@ app.post('/admin/login', (req, res) => {
   });  
 });
 
-// Add this endpoint for mass deletion
-app.delete('/devices/batch', verifyAdmin, (req, res) => {
-  const { deviceIds } = req.body;
-  
-  const deleteRepairsQuery = 'DELETE FROM device_repairs WHERE device_id IN (?)';
-  const deleteDevicesQuery = 'DELETE FROM devices WHERE device_id IN (?)';
-
-  db.query(deleteRepairsQuery, [deviceIds], (deleteRepairsErr) => {
-    if (deleteRepairsErr) {
-      return res.status(500).json({ error: 'Failed to delete device repairs' });
-    }
-
-    db.query(deleteDevicesQuery, [deviceIds], (deleteDevicesErr, result) => {
-      if (deleteDevicesErr) {
-        return res.status(500).json({ error: 'Failed to delete devices' });
-      }
-
-      res.json({
-        message: 'Devices deleted successfully',
-        deletedCount: result.affectedRows
-      });
-    });
-  });
-});
