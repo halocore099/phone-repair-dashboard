@@ -240,14 +240,13 @@ const registerAdmin = async () => {
     {showAdminModal && <AdminModal />}
   const handleAddDevice = async () => {
     try {
-      await axios.post('http://localhost:3001/devices', newDevice);
-
+      const response = await axios.post('http://localhost:3001/devices', newDevice);
       setDevices([
         ...devices,
         {
-          device_id: devices.length + 1,
+          device_id: response.data.device_id,
           ...newDevice,
-          repairs: []
+          repair_count: 0 // Initialize with 0 repairs
         }
       ]);
       setNewDevice({ device_name: "", brand: "" });
@@ -602,7 +601,7 @@ const registerAdmin = async () => {
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <Button
                           variant="outline"
-                          className="mr-2"
+                          className="mr-2" 
                           onClick={() => {
                             setSelectedDevice(device);
                             setIsViewModalOpen(true);
@@ -645,7 +644,7 @@ const registerAdmin = async () => {
         
         {showAdminModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg">
+            <div className="bg-wh ite p-6 rounded-lg">
               <h2 className="text-xl mb-4">Admin Authentication</h2>
               <Input
                 placeholder="Admin Email"
@@ -654,7 +653,7 @@ const registerAdmin = async () => {
                 className="mb-2"
               />
               <Input
-                type="password"
+                type="password" 
                 placeholder="Admin Password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}

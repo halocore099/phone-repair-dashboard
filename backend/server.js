@@ -373,3 +373,28 @@ app.post('/admin/login', (req, res) => {
     });
   });  
 });
+
+// Add this endpoint for mass deletion
+app.delete('/devices/batch', verifyAdmin, (req, res) => {
+  const { deviceIds } = req.body;
+  
+  const deleteRepairsQuery = 'DELETE FROM device_repairs WHERE device_id IN (?)';
+  const deleteDevicesQuery = 'DELETE FROM devices WHERE device_id IN (?)';
+
+  db.query(deleteRepairsQuery, [deviceIds], (deleteRepairsErr) => {
+    if (deleteRepairsErr) {
+      return res.status(500).json({ error: 'Failed to delete device repairs' });
+    }
+
+    db.query(deleteDevicesQuery, [deviceIds], (deleteDevicesErr, result) => {
+      if (deleteDevicesErr) {
+        return res.status(500).json({ error: 'Failed to delete devices' });
+      }
+
+      res.json({
+        message: 'Devices deleted successfully',
+        deletedCount: result.affectedRows
+      });
+    });
+  });
+});
