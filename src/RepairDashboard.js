@@ -44,9 +44,9 @@ const registerAdmin = async () => {
   try {
     const response = await axios.post('http://localhost:3001/register-admin', {
       email: adminEmail,
-      password: adminPassword
+      password: adminPassword 
     });
-    console.log('Registration successful:', response.data);
+    console.log('Registration successful:', response.data); 
     // Now try the delete operation again
     await confirmDeviceDeletion();
   } catch (error) {

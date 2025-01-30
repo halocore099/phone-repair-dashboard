@@ -73,7 +73,7 @@ db.connect((err) => {
     
       next();
     });
-};// Endpoint to add a new repair type
+};// Add a new repair type
 app.post('/repairtypes', (req, res) => {
   const { repair_type } = req.body;
 
@@ -82,7 +82,6 @@ app.post('/repairtypes', (req, res) => {
   }
 
   const query = 'INSERT INTO repairtypes (repair_type) VALUES (?)';
-
   db.query(query, [repair_type], (err, result) => {
     if (err) {
       console.error('Error adding repair type:', err);
@@ -90,8 +89,34 @@ app.post('/repairtypes', (req, res) => {
     }
     res.status(201).json({
       message: 'Repair type added successfully',
-      repair_type_id: result.insertId,
+      repair_type_id: result.insertId
     });
+  });
+});
+// Update a repair type
+app.put('/repairtypes/:id', (req, res) => {
+  const { repair_type, price } = req.body;
+  const id = parseInt(req.params.id);
+
+  const query = 'UPDATE repairtypes SET repair_type = ?, price = ? WHERE repair_type_id = ?';
+  db.query(query, [repair_type, price, id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to update repair type' });
+    }
+    res.json({ message: 'Repair type updated successfully' });
+  });
+});
+
+// Delete a repair type
+app.delete('/repairtypes/:id', verifyAdmin, (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const query = 'DELETE FROM repairtypes WHERE repair_type_id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to delete repair type' });
+    }
+    res.json({ message: 'Repair type deleted successfully' });
   });
 });
 
@@ -107,7 +132,6 @@ app.get('/repairtypes', (req, res) => {
     res.json(results);
   });
 });
-
 // Get all devices with their repairs
 app.get('/devices', (req, res) => {
   const { search, limit = 20, offset = 0, brand } = req.query;
@@ -318,7 +342,7 @@ app.get('/devices/:device_id/repairs', (req, res) => {
     FROM
       device_repairs dr
     JOIN
-      repairtypes rt ON dr.repair_type_id = rt.repair_type_id
+      repairtypes rt ON dr.repair_type_id = rt.repair_type_id   
     WHERE
       dr.device_id = ?
   `;
@@ -335,7 +359,7 @@ app.get('/devices/:device_id/repairs', (req, res) => {
 
 // Add this endpoint to help with admin registration
 app.post('/register-admin', (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body; 
   const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
   
   console.log('Registering admin with:', {
@@ -362,7 +386,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Enhanced admin authentication endpoint
+// Enhanced admin aut hentication endpoint
 app.post('/admin/login', (req, res) => {
   const { email, password } = req.body;
   
@@ -404,3 +428,74 @@ app.post('/admin/login', (req, res) => {
   });  
 });
 
+
+app.post('/repairtypes/batch', (req, res) => {
+  const { repair_types } = req.body;
+
+  if (!repair_types || !Array.isArray(repair_types)) {
+    return res.status(400).json({ error: 'Array of repair types is required' });
+  }
+
+  const values = repair_types.map(item => [item.repair_type]);
+  const query = 'INSERT INTO repairtypes (repair_type) VALUES ?';
+
+  db.query(query, [values], (err, result) => {
+    if (err) {
+      console.error('Error adding repair types:', err);
+      return res.status(500).json({ error: 'Failed to add repair types' });
+    }
+    res.status(201).json({
+      message: 'Repair types added successfully',
+      insertedCount: result.affectedRows
+    });
+  });
+});
+
+app.post('/devices/batch', (req, res) => {
+  const { devices } = req.body;
+
+  if (!devices || !Array.isArray(devices)) {
+    return res.status(400).json({ error: 'Array of devices is required' });
+  }
+
+  const values = devices.map(device => [device.device_name, device.brand]);
+  const query = 'INSERT INTO devices (device_name, brand) VALUES ?';
+
+  db.query(query, [values], (err, result) => {
+    if (err) {
+      console.error('Error adding devices:', err);
+      return res.status(500).json({ error: 'Failed to add devices' });
+    }
+    res.status(201).json({
+      message: 'Devices added successfully',
+      insertedCount: result.affectedRows
+    });
+  });
+});
+
+app.post('/device-repairs/batch', (req, res) => {
+  const { device_repairs } = req.body;
+
+  if (!device_repairs || !Array.isArray(device_repairs)) {
+    return res.status(400).json({ error: 'Array of device repairs is required' });
+  }
+
+  const values = device_repairs.map(repair => [
+    repair.device_id,
+    repair.repair_type_id,
+    repair.price
+  ]);
+
+  const query = 'INSERT INTO device_repairs (device_id, repair_type_id, price) VALUES ?';
+
+  db.query(query, [values], (err, result) => {
+    if (err) {
+      console.error('Error adding device repairs:', err);
+      return res.status(500).json({ error: 'Failed to add device repairs' });
+    }
+    res.status(201).json({
+      message: 'Device repairs added successfully',
+      insertedCount: result.affectedRows
+    });
+  });
+});
