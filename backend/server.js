@@ -429,6 +429,26 @@ app.post('/admin/login', (req, res) => {
 });
 
 
+app.post('/repairtypes', (req, res) => {
+  const { repair_type, code } = req.body;
+
+  if (!repair_type) {
+    return res.status(400).json({ error: 'Repair type is required' });
+  }
+
+  const query = 'INSERT INTO repairtypes (repair_type, code) VALUES (?, ?)';
+  db.query(query, [repair_type, code], (err, result) => {
+    if (err) {
+      console.error('Error adding repair type:', err);
+      return res.status(500).json({ error: 'Failed to add repair type' });
+    }
+    res.status(201).json({
+      message: 'Repair type added successfully',
+      repair_type_id: result.insertId
+    });
+  });
+});
+
 app.post('/repairtypes/batch', (req, res) => {
   const { repair_types } = req.body;
 
@@ -436,8 +456,8 @@ app.post('/repairtypes/batch', (req, res) => {
     return res.status(400).json({ error: 'Array of repair types is required' });
   }
 
-  const values = repair_types.map(item => [item.repair_type]);
-  const query = 'INSERT INTO repairtypes (repair_type) VALUES ?';
+  const values = repair_types.map(item => [item.repair_type, item.code]);
+  const query = 'INSERT INTO repairtypes (repair_type, code) VALUES ?';
 
   db.query(query, [values], (err, result) => {
     if (err) {

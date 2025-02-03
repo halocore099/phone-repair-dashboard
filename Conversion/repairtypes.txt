@@ -1,0 +1,261 @@
+- G00: Austausch Akku
+- G03: Austausch Akku Premium
+- G08: Austausch Akku Original
+- G06: Bundle Akku Standard
+- G07: Bundle Akku Premium
+- G01: Austausch Mainboard
+- G02: Austausch Grafikkarte
+- G04: Reseating
+- G05: Scharnierreparatur
+- G09: Austausch Scharnierleiste
+- G96: Austausch Hinge Cover
+- G97: Austausch diverse Kleinstbauteile
+- G98: Austausch Grafikkarte
+- G99: Austausch Original Netzteil
+- G70: Mainboard Lötarbeiten
+- G71: Grafikkarten Lötarbeiten
+- G72: Netzbuchsen Lötarbeiten
+- G73: Diverse Lötarbeiten
+- G74: Austausch Grafikchip
+- G75: Austausch diverser Mainboardkomponenten
+- G76: Austausch Northbridgechip
+- G77: Kurzschlussbeseitigung
+- G78: Austausch Original Mainboard
+- G10: Austausch Kamera
+- G11: Austausch Kamera hinten
+- G46: Austausch Original TrueDepth / Face ID Kamera
+- G12: Austausch Backcover
+- G24: Austausch Backcoverglas
+- G26: Austausch Rücksystem Original
+- G13: Austausch Lüfter
+- G14: Austausch Tastatur
+- G15: Austausch Topcase
+- G16: Austausch Bottomcase
+- G17: Austausch Displaydeckel
+- G18: Austausch Trackpad
+- G25: Austausch Trackpadflexkabel
+- G19: Farbumbau
+- G20: Austausch Kameraglas
+- G21: Austausch Mittelrahmen
+- G22: Austausch Scharnier (neu)
+- G23: Austausch Displaybezel (neu)
+- G27: Austausch Original Topcase inkl. Tastatur
+- G28: Austausch Original Topcase inkl. Tastatur und Akku
+- G29: Austausch Original Bottomcase
+- G47: Austausch Original Gehäuse
+- G48: Austausch Original Trackpad
+- G49: Trackpad Reparatur
+- G30: Austausch Ein/Aus-Schalter
+- G31: Austausch Home Button
+- G32: Austausch Lautstärkeflex
+- G33: Austausch Stummschalterflex
+- G34: Austausch WiFi-Schalter
+- G35: Austausch Home Button Flex
+- G36: Austausch WiFi-Antenne
+- G40: Austausch Mikrofon
+- G41: Austausch Ohrmuschel
+- G42: Austausch Lautsprecher
+- G43: Austausch Audiobuchse
+- G50: Austausch Ladebuchse
+- G51: Austausch SIM Connector
+- G52: Austausch Lichtsensor
+- G53: Austausch WiFi-Modul
+- G54: Austausch Vibrationsmotor
+- G55: Austausch HDMI-Anschluss
+- G56: Austausch DVI-Anschluss
+- G57: Austausch VGA-Anschluss
+- G58: Austausch Displayport-Anschluss
+- G59: Austausch USB-Anschluss
+- G60: Austausch Ethernetanschluss
+- G61: Austausch Netzbuchse
+- G62: Austausch Netzteil
+- G63: Komplettreinigung inkl. Wärmeleitpaste
+- G64: Flüssigkeitsreinigung
+- G65: Reinigung
+- G67: Reinigung Ladebuchse
+- G68: Reinigung (geringer Aufwand)
+- G69: Reinigung (großer Aufwand)
+- G66: Austausch C-MOS Batterie
+- G81: Austausch Backlight IC
+- G82: Austausch Ladeelektronik
+- G83: Austausch Touch IC
+- G84: Austausch Kamera IC 
+- G85: Austausch BIOS-Chip inkl. Flashing
+- G86: Chip-Level-Recparatur
+- G87: Reparatur WLAN Modul
+- G88: Austausch Displaykonnektor
+- G89: Austausch Tastaturkonnektor
+- G90: Austausch Audio IC
+- G91: Austausch Powermanagement IC
+- G92: Austausch Tristar/U2 IC
+- G93: Austausch Baseband IC
+- G94: Austausch NAND
+- G95: NAND Aufrüstung
+- D00: Displaywechsel mit LCD/LED
+- D01: Austausch Display-LCD/LED-Einheit
+- D05: Austausch Premium Display
+- D06: Austausch Original Displayeinheit
+- D02: Glaswechsel
+- D03: LCD/LED Wechsel
+- D04: Austausch Displaykabel
+- D07: Austausch Original Touchbar
+- L00: Austausch DVD-Laufwerk
+- L01: Austausch Bluray-Laufwerkc
+- L02: Austausch Lasereinheit
+- L03: Austausch DVD-Brenner
+- L04: Austausch Bluray-Brenner
+- F00: Einbau Festplatte 3,5'' 500GB
+- F01: Einbau Festplatte 3,5'' 1TB
+- F18: Einbau Festplatte 3,5'' 2TB (neu)
+- F19: Einbau Festplatte 3,5'' 4TB (neu)
+- F20: Einbau Festplatte 3,5'' 8TB (neu)
+- F02: Einbau Festplatte 2,5'' 500GB
+- F03: Einbau Festplatte 2,5'' 1TB
+- F21: Einbau Festplatte 2,5'' 2TB (neu)
+- F11: Einbau SSD 120GB
+- F04: Einbau SSD 240GB
+- F05: Einbau SSD 500GB
+- F06: Einbau SSD 1TB
+- F22: Einbau SSD 2TB (neu)
+- F23: Einbau SSD 4TB (neu)
+- F35: Austausch Original SSD 256GB
+- F36: Austausch Original SSD 512GB
+- F37: Austausch Original SSD 1TB
+- F38: Austausch Original SSD 2TB
+- F07: Austausch Festplattenkabel
+- F08: Einbau iFlash mSATA SSD
+- F09: Einbau HDD 1,8''
+- F10: Einbau iFlash SDHC 1,8''
+- F12: Einbau mSata SSD 128GB
+- F13: Einbau mSata SSD 256GB
+- F14: Einbau mSata SSD 512GB
+- F15: Einbau mSata SSD 1TB
+- F24: Einbau M.2 SSD 64GB (neu)
+- F25: Einbau M.2 SSD 120GB (neu)
+- F26: Einbau M.2 SSD 250GB (neu)
+- F27: Einbau M.2 SSD 500GB (neu)
+- F28: Einbau M.2 SSD 1TB (neu)
+- F29: Einbau M.2 SSD 2TB (neu)
+- F16: Festplatte in externes Gehäuse 2,5''
+- F17: Festplatte in externes Gehäuse 3,5''
+- F30: Speichererweiterung auf 64GB (neu)
+- F31: Speichererweiterung auf 128GB (neu)
+- F32: Speichererweiterung auf 256GB (neu)
+- F33: Speichererweiterung auf 512GB (neu)
+- F34: Einbaurahmen 2,5" zu 3,5"
+- R00: Einbau 1GB SO-DDR2
+- R10: Einbau 1GB DDR2
+- R01: Einbau 2GB SO-DDR2
+- R11: Einbau 2GB DDR2
+- R02: Einbau 4GB SO-DDR2
+- R12: Einbau 4GB DDR2
+- R03: Einbau 4GB SO-DDR3
+- R13: Einbau 4GB DDR3
+- R04: Einbau 8GB SO-DDR3
+- R14: Einbau 8GB DDR3
+- R05: Einbau 4GB SO-DDR4
+- R15: Einbau 4GB DDR4
+- R06: Einbau 8GB SO-DDR4
+- R16: Einbau 8GB DDR4
+- R07: Einbau 16GB SO-DDR4
+- R17: Einbau 16GB DDR4
+- R08: Einbau 32GB SO-DDR4
+- R18: Einbau 32GB DDR4
+- R09: Einbau 16GB SO-DDR3
+- R19: Einbau 16GB DDR3
+- R25: Austausch Original RAM 4GB
+- R26: Austausch Original RAM 8GB
+- R27: Austausch Original RAM 16GB
+- R28: Austausch Original RAM 32GB
+- R71: Austausch Original RAM 64GB
+- R72: Austausch Original RAM 128GB
+- R73: Austausch Original RAM 256GB
+- N00: PC Netzteil 450W
+- N01: PC Netzteil 600W
+- N02: PC Netzteil 700W
+- Z00: Panzerglas inkl. Anbringung
+- Z01: Folie anbringen
+- Z02: Externe 2,5'' HDD USB 3.0 500GB
+- Z03: Externe 2,5'' HDD USB 3.0 1TB
+- Z04: Externe 2,5'' HDD USB 3.0 2TB
+- Z05: Panzerglas Premium inkl. Anbringung
+- Z06: Panzerglas Standard inkl. Anbringung
+- Z07: Panzerglas Privacy inkl. Anbringung
+- Z08: Bundle Panzerglas Premium
+- Z09: Bundle Panzerglas Standard
+- Z10: Hydrogel Folie inkl. Anbringung (vorne)
+- Z11: Hydrogel Folie inkl. Anbringung (vorne)
+- S00: Datensicherung
+- S36: Datenübertragung Standard
+- S37: Datenübertragung Premium
+- S38: sichere Datenlöschung (Zertifikat)
+- S01: Simlock Entfernung
+- S02: Datenmigration
+- S03: Systemaktualisierung
+- S04: Neuinstallation OSX
+- S05: Neuinstallation iOS
+- S06: Neuinstallation Windows
+- S07: Neuinstallation Android
+- S08: Neuinstallation diverse Systeme
+- S09: Virenentfernung
+- S10: Datenrettung 50GB
+- S11: Datenrettung 250GB
+- S12: Datenrettung bei logischem Schaden
+- S13: Datenrettung 2TB
+- S35: Datenrettung Mobile
+- S41: Board Swap Datenrettung
+- S14: Systemoptimierung
+- S15: erweiterte Systemoptimierung
+- S16: Sicherheitscheck
+- S17: Einrichtung Datensicherung
+- S18: Geräteersteinrichtung
+- S19: Installation Software (Individuell)
+- S39: Softwareupdate 
+- S20: Datenrettung komplex (externes Partnerlabor)
+- S21: Installation Parallels/BootCamp inkl. Windows
+- S22: Systemreparatur
+- S23: GDATA Antivirus 1 Jahreslizenz
+- S31: Windows 7 Home Premium Lizenz (neu)
+- S32: Windows 7 Professional Lizenz (neu)
+- S24: Windows 10 Pro Lizenz
+- S33: Bullguard Internet Security 1 Jahr / 3 PCs
+- S34: Bullguard Internet Security 3 Monate Testversion
+- S25: ESET Internet Security 1 Jahr / 1 PC
+- S26: ESET Internet Security HaspaJoker 1 Jahr / 1 PC
+- S27: Office 2016 Home and Business - Original 1 PC
+- S28: Office 2016 Home and Business Mac - Original 1 PC
+- S29: Office 2016 Home and Student - Original 1 PC
+- S30: Office 2016 Home and Student Mac - Original 1 PC
+- S40: Systemfreischaltung (iCloud iOS und Android)
+- A00: Wasserschadenanalyse
+- A01: Fallschadenanalyse
+- A02: kostenpflichtige Analyse
+- A03: Kostenvoranschlag für Versicherungen
+- A04: Gutachten
+- A05: Online Analyse
+- A06: kostenlose Analyse
+- A07: Express Pauschale
+- A08: Gerätetest (Zertifikat)
+- A09: kostenpflichtige Analyse verringert
+- O00: geringer Aufwand (15 min)
+- O01: mittlerer Aufwand (30 min)
+- O02: großer Aufwand (60 min)
+- O16: sehr großer Aufwand (90 min)
+- O03: extremer Aufwand (120 min)
+- O04: Zusammenbau
+- O05: Garantieabwicklung
+- O06: Einbau weiterer Komponente
+- O07: Austauschgerät
+- O08: Gravur Standard
+- O09: Gravur Premium
+- O10: Gravur Individual
+- O11: Geräteverkauf (Reklamation)
+- O12: Geräteankauf (Bewertung)
+- O13: Bundle Servicepaket Standard
+- O14: Bundle Servicepaket Premium
+- O15: Bundle Servicepaket Standard
+- O17: Selbstbehalt HaspaJoker
+- O18: Selbstbehalt Wertgarantie
+- O19: Selbstbehalt S-Mobilgeräte
+- O20: Herstellerabwicklung
+
