@@ -382,127 +382,167 @@ const registerAdmin = async () => {
       </div>
     );
   };
-  
-
-  const EditModal = ({ device, onClose }) => {
-    const [editedRepairs, setEditedRepairs] = useState([]);
-    const [selectedRepairType, setSelectedRepairType] = useState(null);
-    const [repairTypes, setRepairTypes] = useState([]); // State to hold repair types
-  
-    useEffect(() => {
-      const fetchRepairTypes = async () => {
-        try {
-          const response = await axios.get('http://localhost:3001/repairtypes'); // Changed from repair-types to repairtypes
-          setRepairTypes(response.data);
-        } catch (error) {
-          console.error('Error fetching repair types:', error);
-        }
-      };
-  
-      fetchRepairTypes();
-    }, []); // Run this effect only once when the component mounts
-    
-    useEffect(() => {
-      const fetchRepairs = async () => {
-        try {
-          const response = await axios.get(`http://localhost:3001/devices/${device.device_id}/repairs`);
-          setEditedRepairs(response.data);
-        } catch (error) {
-          console.error('Error fetching repairs:', error);
-        }
-      };
-  
-      fetchRepairs();
-    }, [device.device_id]);
-  
-    const handleAddRepair = () => {
-      if (selectedRepairType) {
-        const newRepair = {
-          repair_type_id: selectedRepairType.repair_type_id,
-          repair_type: selectedRepairType.repair_type,
-          price: selectedRepairType.price,
+        const REPAIR_CATEGORIES = {
+          G: 'Allgemein',
+          D: 'Display',
+          L: 'Laufwerke',
+          F: 'Festplatten',
+          R: 'RAM',
+          N: 'Netzteil',
+          Z: 'Zubehör',
+          S: 'Software',
+          A: 'Analysen',
+          O: 'Sonstige Reparaturen'
         };
-        setEditedRepairs([...editedRepairs, newRepair]);
-        setSelectedRepairType(null);
-      }
-    };
+
+        const EditModal = ({ device, onClose }) => {
+          const [editedRepairs, setEditedRepairs] = useState([]);
+          const [selectedRepairType, setSelectedRepairType] = useState(null);
+          const [repairTypes, setRepairTypes] = useState([]);
+          const [searchTerm, setSearchTerm] = useState('');
+
+          useEffect(() => {
+            const fetchRepairTypes = async () => {
+              try {
+                const response = await axios.get('http://localhost:3001/repairtypes');
+                setRepairTypes(response.data);
+              } catch (error) {
+                console.error('Error fetching repair types:', error);
+              }
+            };
+
+            fetchRepairTypes();
+          }, []);
   
-    const handleSave = async () => {
-      try {
-        const formattedRepairs = editedRepairs.map(repair => ({
-          repair_type_id: repair.repair_type_id,
-          price: repair.price
-        }));
-  
-        await handleSaveRepairs(device.device_id, formattedRepairs);
-        const response = await axios.get('http://localhost:3001/devices');
-        setDevices(response.data);
-        onClose();
-      } catch (error) {
-        console.error('Error saving repairs:', error);
-      }
-    };
-  
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">
-              {device.device_name} - {device.brand} (ID: {device.device_id})
-            </h2>
-            <Button variant="ghost" onClick={onClose}>×</Button>
-          </div>
-          <div className="space-y-4">
-            {editedRepairs.map((repair, index) => (
-              <div key={repair.repair_type_id} className="flex items-center gap-4">
-                <span className="min-w-[200px]">{repair.repair_type}</span>
-                <Input
-                  type="number"
-                  value={repair.price}
-                  onChange={(e) => {
-                    const newRepairs = [...editedRepairs];
-                    newRepairs[index] = {
-                      ...repair,
-                      price: parseFloat(e.target.value) || 0
-                    };
-                    setEditedRepairs(newRepairs);
-                  }}
-                  className="w-32"
-                />
-                <Button variant="outline" onClick={() => handleRemoveRepair(device.device_id, repair.repair_type_id)}>
-                  Remove
-                </Button>
+          useEffect(() => {
+            const fetchRepairs = async () => {
+              try {
+                const response = await axios.get(`http://localhost:3001/devices/${device.device_id}/repairs`);
+                setEditedRepairs(response.data);
+              } catch (error) {
+                console.error('Error fetching repairs:', error);
+              }
+            };
+
+            fetchRepairs();
+          }, [device.device_id]);
+
+          const handleAddRepair = () => {
+            if (selectedRepairType) {
+              const newRepair = {
+                repair_type_id: selectedRepairType.repair_type_id,
+                repair_type: selectedRepairType.repair_type,
+                price: selectedRepairType.price,
+              };
+              setEditedRepairs([...editedRepairs, newRepair]);
+              setSelectedRepairType(null);
+            }
+          };
+
+          const handleSave = async () => {
+            try {
+              const formattedRepairs = editedRepairs.map(repair => ({
+                repair_type_id: repair.repair_type_id,
+                price: repair.price
+              }));
+
+              await handleSaveRepairs(device.device_id, formattedRepairs);
+              const response = await axios.get('http://localhost:3001/devices');
+              setDevices(response.data);
+              onClose();
+            } catch (error) {
+              console.error('Error saving repairs:', error);
+            }
+          };
+
+          const groupedRepairTypes = repairTypes.reduce((acc, repair) => {
+            const category = repair.category || 'O';
+            if (!acc[category]) {
+              acc[category] = [];
+            }
+            acc[category].push(repair);
+            return acc;
+          }, {});
+
+          const filteredRepairTypes = repairTypes.filter(repair => 
+            repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+
+          return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">
+                    {device.device_name} - {device.brand} (ID: {device.device_id})
+                  </h2>
+                  <Button variant="ghost" onClick={onClose}>×</Button>
+                </div>
+                <div className="space-y-4">
+                  {editedRepairs.map((repair, index) => (
+                    <div key={repair.repair_type_id} className="flex items-center gap-4">
+                      <span className="min-w-[200px]">{repair.repair_type}</span>
+                      <Input
+                        type="number"
+                        value={repair.price}
+                        onChange={(e) => {
+                          const newRepairs = [...editedRepairs];
+                          newRepairs[index] = {
+                            ...repair,
+                            price: parseFloat(e.target.value) || 0
+                          };
+                          setEditedRepairs(newRepairs);
+                        }}
+                        className="w-32"
+                      />
+                      <Button variant="outline" onClick={() => handleRemoveRepair(device.device_id, repair.repair_type_id)}>
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-full">
+                      <Input
+                        type="text"
+                        placeholder="Search repair types..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full"
+                      />
+                      <select
+                        value={selectedRepairType ? selectedRepairType.repair_type_id : ''}
+                        onChange={(e) => {
+                          const selectedType = repairTypes.find(r => r.repair_type_id === parseInt(e.target.value));
+                          setSelectedRepairType(selectedType);
+                        }}
+                        className="w-full mt-2 border p-2"
+                      >
+                        <option value="">Select Repair Type</option>
+                        {Object.entries(REPAIR_CATEGORIES).map(([category, categoryName]) => (
+                          <optgroup key={category} label={`${category} - ${categoryName}`}>
+                            {filteredRepairTypes
+                              .filter(repair => repair.category === category)
+                              .map(repair => (
+                                <option key={repair.repair_type_id} value={repair.repair_type_id}>
+                                  {repair.repair_type} - ${repair.price}
+                                </option>
+                              ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+                    <Button onClick={handleAddRepair}>Add Repair</Button>
+                  </div>
+
+                  <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </div>
+                </div>
               </div>
-            ))}
-  
-            <div className="flex items-center gap-4">
-              <select
-                value={selectedRepairType ? selectedRepairType.repair_type_id : ''}
-                onChange={(e) => {
-                  const selectedType = repairTypes.find(r => r.repair_type_id === parseInt(e.target.value));
-                  setSelectedRepairType(selectedType);
-                }}
-                className="border p-2"
-              >
-                <option value="">Select Repair Type</option>
-                {repairTypes.map((repair) => (
-                  <option key={repair.repair_type_id} value={repair.repair_type_id}>
-                    {repair.repair_type} - ${repair.price}
-                  </option>
-                ))}
-              </select>
-              <Button onClick={handleAddRepair}>Add Repair</Button>
             </div>
-  
-            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSave}>Save Changes</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+          );
+        };
     
     return (
       <div className="p-4 space-y-4">

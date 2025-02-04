@@ -2,1043 +2,1563 @@
     "repair_types": [
         {
             "repair_type": "Austausch Akku",
-            "code": "G00"
+            "code": "G00",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Akku Premium",
-            "code": "G03"
+            "code": "G03",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Akku Original",
-            "code": "G08"
+            "code": "G08",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Bundle Akku Standard",
-            "code": "G06"
+            "code": "G06",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Bundle Akku Premium",
-            "code": "G07"
+            "code": "G07",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Mainboard",
-            "code": "G01"
+            "code": "G01",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Grafikkarte",
-            "code": "G02"
+            "code": "G02",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reseating",
-            "code": "G04"
+            "code": "G04",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Scharnierreparatur",
-            "code": "G05"
+            "code": "G05",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Scharnierleiste",
-            "code": "G09"
+            "code": "G09",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Hinge Cover",
-            "code": "G96"
+            "code": "G96",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch diverse Kleinstbauteile",
-            "code": "G97"
+            "code": "G97",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Grafikkarte",
-            "code": "G98"
+            "code": "G98",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Netzteil",
-            "code": "G99"
+            "code": "G99",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Mainboard Lötarbeiten",
-            "code": "G70"
+            "code": "G70",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Grafikkarten Lötarbeiten",
-            "code": "G71"
+            "code": "G71",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Netzbuchsen Lötarbeiten",
-            "code": "G72"
+            "code": "G72",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Diverse Lötarbeiten",
-            "code": "G73"
+            "code": "G73",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Grafikchip",
-            "code": "G74"
+            "code": "G74",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch diverser Mainboardkomponenten",
-            "code": "G75"
+            "code": "G75",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Northbridgechip",
-            "code": "G76"
+            "code": "G76",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Kurzschlussbeseitigung",
-            "code": "G77"
+            "code": "G77",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Mainboard",
-            "code": "G78"
+            "code": "G78",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Kamera",
-            "code": "G10"
+            "code": "G10",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Kamera hinten",
-            "code": "G11"
+            "code": "G11",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original TrueDepth / Face ID Kamera",
-            "code": "G46"
+            "code": "G46",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Backcover",
-            "code": "G12"
+            "code": "G12",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Backcoverglas",
-            "code": "G24"
+            "code": "G24",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Rücksystem Original",
-            "code": "G26"
+            "code": "G26",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Lüfter",
-            "code": "G13"
+            "code": "G13",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Tastatur",
-            "code": "G14"
+            "code": "G14",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Topcase",
-            "code": "G15"
+            "code": "G15",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Bottomcase",
-            "code": "G16"
+            "code": "G16",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Displaydeckel",
-            "code": "G17"
+            "code": "G17",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Trackpad",
-            "code": "G18"
+            "code": "G18",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Trackpadflexkabel",
-            "code": "G25"
+            "code": "G25",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Farbumbau",
-            "code": "G19"
+            "code": "G19",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Kameraglas",
-            "code": "G20"
+            "code": "G20",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Mittelrahmen",
-            "code": "G21"
+            "code": "G21",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Scharnier (neu)",
-            "code": "G22"
+            "code": "G22",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Displaybezel (neu)",
-            "code": "G23"
+            "code": "G23",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Topcase inkl. Tastatur",
-            "code": "G27"
+            "code": "G27",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Topcase inkl. Tastatur und Akku",
-            "code": "G28"
+            "code": "G28",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Bottomcase",
-            "code": "G29"
+            "code": "G29",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Gehäuse",
-            "code": "G47"
+            "code": "G47",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Original Trackpad",
-            "code": "G48"
+            "code": "G48",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Trackpad Reparatur",
-            "code": "G49"
+            "code": "G49",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Ein/Aus-Schalter",
-            "code": "G30"
+            "code": "G30",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Home Button",
-            "code": "G31"
+            "code": "G31",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Lautstärkeflex",
-            "code": "G32"
+            "code": "G32",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Stummschalterflex",
-            "code": "G33"
+            "code": "G33",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch WiFi-Schalter",
-            "code": "G34"
+            "code": "G34",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Home Button Flex",
-            "code": "G35"
+            "code": "G35",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch WiFi-Antenne",
-            "code": "G36"
+            "code": "G36",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Mikrofon",
-            "code": "G40"
+            "code": "G40",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Ohrmuschel",
-            "code": "G41"
+            "code": "G41",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Lautsprecher",
-            "code": "G42"
+            "code": "G42",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Audiobuchse",
-            "code": "G43"
+            "code": "G43",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Ladebuchse",
-            "code": "G50"
+            "code": "G50",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch SIM Connector",
-            "code": "G51"
+            "code": "G51",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Lichtsensor",
-            "code": "G52"
+            "code": "G52",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch WiFi-Modul",
-            "code": "G53"
+            "code": "G53",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Vibrationsmotor",
-            "code": "G54"
+            "code": "G54",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch HDMI-Anschluss",
-            "code": "G55"
+            "code": "G55",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch DVI-Anschluss",
-            "code": "G56"
+            "code": "G56",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch VGA-Anschluss",
-            "code": "G57"
+            "code": "G57",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Displayport-Anschluss",
-            "code": "G58"
+            "code": "G58",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch USB-Anschluss",
-            "code": "G59"
+            "code": "G59",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Ethernetanschluss",
-            "code": "G60"
+            "code": "G60",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Netzbuchse",
-            "code": "G61"
+            "code": "G61",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Netzteil",
-            "code": "G62"
+            "code": "G62",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Komplettreinigung inkl. Wärmeleitpaste",
-            "code": "G63"
+            "code": "G63",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Flüssigkeitsreinigung",
-            "code": "G64"
+            "code": "G64",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reinigung",
-            "code": "G65"
+            "code": "G65",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reinigung Ladebuchse",
-            "code": "G67"
+            "code": "G67",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reinigung (geringer Aufwand)",
-            "code": "G68"
+            "code": "G68",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reinigung (großer Aufwand)",
-            "code": "G69"
+            "code": "G69",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch C-MOS Batterie",
-            "code": "G66"
+            "code": "G66",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Backlight IC",
-            "code": "G81"
+            "code": "G81",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Ladeelektronik",
-            "code": "G82"
+            "code": "G82",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Touch IC",
-            "code": "G83"
+            "code": "G83",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Kamera IC",
-            "code": "G84"
+            "code": "G84",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch BIOS-Chip inkl. Flashing",
-            "code": "G85"
+            "code": "G85",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
-            "repair_type": "Chip-Level-Reparatur",
-            "code": "G86"
+            "repair_type": "Chip-Level-Recparatur",
+            "code": "G86",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Reparatur WLAN Modul",
-            "code": "G87"
+            "code": "G87",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Displaykonnektor",
-            "code": "G88"
+            "code": "G88",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Tastaturkonnektor",
-            "code": "G89"
+            "code": "G89",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Audio IC",
-            "code": "G90"
+            "code": "G90",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Powermanagement IC",
-            "code": "G91"
+            "code": "G91",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Tristar/U2 IC",
-            "code": "G92"
+            "code": "G92",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch Baseband IC",
-            "code": "G93"
+            "code": "G93",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Austausch NAND",
-            "code": "G94"
+            "code": "G94",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "NAND Aufrüstung",
-            "code": "G95"
+            "code": "G95",
+            "category": "G",
+            "category_name": "Allgemein"
         },
         {
             "repair_type": "Displaywechsel mit LCD/LED",
-            "code": "D00"
+            "code": "D00",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch Display-LCD/LED-Einheit",
-            "code": "D01"
+            "code": "D01",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch Premium Display",
-            "code": "D05"
+            "code": "D05",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch Original Displayeinheit",
-            "code": "D06"
+            "code": "D06",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Glaswechsel",
-            "code": "D02"
+            "code": "D02",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "LCD/LED Wechsel",
-            "code": "D03"
+            "code": "D03",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch Displaykabel",
-            "code": "D04"
+            "code": "D04",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch Original Touchbar",
-            "code": "D07"
+            "code": "D07",
+            "category": "D",
+            "category_name": "Display"
         },
         {
             "repair_type": "Austausch DVD-Laufwerk",
-            "code": "L00"
+            "code": "L00",
+            "category": "L",
+            "category_name": "Laufwerke"
         },
         {
-            "repair_type": "Austausch Bluray-Laufwerk",
-            "code": "L01"
+            "repair_type": "Austausch Bluray-Laufwerkc",
+            "code": "L01",
+            "category": "L",
+            "category_name": "Laufwerke"
         },
         {
             "repair_type": "Austausch Lasereinheit",
-            "code": "L02"
+            "code": "L02",
+            "category": "L",
+            "category_name": "Laufwerke"
         },
         {
             "repair_type": "Austausch DVD-Brenner",
-            "code": "L03"
+            "code": "L03",
+            "category": "L",
+            "category_name": "Laufwerke"
         },
         {
             "repair_type": "Austausch Bluray-Brenner",
-            "code": "L04"
+            "code": "L04",
+            "category": "L",
+            "category_name": "Laufwerke"
         },
         {
             "repair_type": "Einbau Festplatte 3,5'' 500GB",
-            "code": "F00"
+            "code": "F00",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 3,5'' 1TB",
-            "code": "F01"
+            "code": "F01",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 3,5'' 2TB (neu)",
-            "code": "F18"
+            "code": "F18",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 3,5'' 4TB (neu)",
-            "code": "F19"
+            "code": "F19",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 3,5'' 8TB (neu)",
-            "code": "F20"
+            "code": "F20",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 2,5'' 500GB",
-            "code": "F02"
+            "code": "F02",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 2,5'' 1TB",
-            "code": "F03"
+            "code": "F03",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau Festplatte 2,5'' 2TB (neu)",
-            "code": "F21"
+            "code": "F21",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 120GB",
-            "code": "F11"
+            "code": "F11",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 240GB",
-            "code": "F04"
+            "code": "F04",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 500GB",
-            "code": "F05"
+            "code": "F05",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 1TB",
-            "code": "F06"
+            "code": "F06",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 2TB (neu)",
-            "code": "F22"
+            "code": "F22",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau SSD 4TB (neu)",
-            "code": "F23"
+            "code": "F23",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Austausch Original SSD 256GB",
-            "code": "F35"
+            "code": "F35",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Austausch Original SSD 512GB",
-            "code": "F36"
+            "code": "F36",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Austausch Original SSD 1TB",
-            "code": "F37"
+            "code": "F37",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Austausch Original SSD 2TB",
-            "code": "F38"
+            "code": "F38",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Austausch Festplattenkabel",
-            "code": "F07"
+            "code": "F07",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau iFlash mSATA SSD",
-            "code": "F08"
+            "code": "F08",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau HDD 1,8''",
-            "code": "F09"
+            "code": "F09",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau iFlash SDHC 1,8''",
-            "code": "F10"
+            "code": "F10",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau mSata SSD 128GB",
-            "code": "F12"
+            "code": "F12",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau mSata SSD 256GB",
-            "code": "F13"
+            "code": "F13",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau mSata SSD 512GB",
-            "code": "F14"
+            "code": "F14",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau mSata SSD 1TB",
-            "code": "F15"
+            "code": "F15",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 64GB (neu)",
-            "code": "F24"
+            "code": "F24",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 120GB (neu)",
-            "code": "F25"
+            "code": "F25",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 250GB (neu)",
-            "code": "F26"
+            "code": "F26",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 500GB (neu)",
-            "code": "F27"
+            "code": "F27",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 1TB (neu)",
-            "code": "F28"
+            "code": "F28",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau M.2 SSD 2TB (neu)",
-            "code": "F29"
+            "code": "F29",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Festplatte in externes Gehäuse 2,5''",
-            "code": "F16"
+            "code": "F16",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Festplatte in externes Gehäuse 3,5''",
-            "code": "F17"
+            "code": "F17",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Speichererweiterung auf 64GB (neu)",
-            "code": "F30"
+            "code": "F30",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Speichererweiterung auf 128GB (neu)",
-            "code": "F31"
+            "code": "F31",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Speichererweiterung auf 256GB (neu)",
-            "code": "F32"
+            "code": "F32",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Speichererweiterung auf 512GB (neu)",
-            "code": "F33"
+            "code": "F33",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbaurahmen 2,5\" zu 3,5\"",
-            "code": "F34"
+            "code": "F34",
+            "category": "F",
+            "category_name": "Festplatten"
         },
         {
             "repair_type": "Einbau 1GB SO-DDR2",
-            "code": "R00"
+            "code": "R00",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 1GB DDR2",
-            "code": "R10"
+            "code": "R10",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 2GB SO-DDR2",
-            "code": "R01"
+            "code": "R01",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 2GB DDR2",
-            "code": "R11"
+            "code": "R11",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB SO-DDR2",
-            "code": "R02"
+            "code": "R02",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB DDR2",
-            "code": "R12"
+            "code": "R12",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB SO-DDR3",
-            "code": "R03"
+            "code": "R03",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB DDR3",
-            "code": "R13"
+            "code": "R13",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 8GB SO-DDR3",
-            "code": "R04"
+            "code": "R04",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 8GB DDR3",
-            "code": "R14"
+            "code": "R14",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB SO-DDR4",
-            "code": "R05"
+            "code": "R05",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 4GB DDR4",
-            "code": "R15"
+            "code": "R15",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 8GB SO-DDR4",
-            "code": "R06"
+            "code": "R06",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 8GB DDR4",
-            "code": "R16"
+            "code": "R16",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 16GB SO-DDR4",
-            "code": "R07"
+            "code": "R07",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 16GB DDR4",
-            "code": "R17"
+            "code": "R17",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 32GB SO-DDR4",
-            "code": "R08"
+            "code": "R08",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 32GB DDR4",
-            "code": "R18"
+            "code": "R18",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 16GB SO-DDR3",
-            "code": "R09"
+            "code": "R09",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Einbau 16GB DDR3",
-            "code": "R19"
+            "code": "R19",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 4GB",
-            "code": "R25"
+            "code": "R25",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 8GB",
-            "code": "R26"
+            "code": "R26",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 16GB",
-            "code": "R27"
+            "code": "R27",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 32GB",
-            "code": "R28"
+            "code": "R28",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 64GB",
-            "code": "R71"
+            "code": "R71",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 128GB",
-            "code": "R72"
+            "code": "R72",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "Austausch Original RAM 256GB",
-            "code": "R73"
+            "code": "R73",
+            "category": "R",
+            "category_name": "RAM"
         },
         {
             "repair_type": "PC Netzteil 450W",
-            "code": "N00"
+            "code": "N00",
+            "category": "N",
+            "category_name": "Netzteil"
         },
         {
             "repair_type": "PC Netzteil 600W",
-            "code": "N01"
+            "code": "N01",
+            "category": "N",
+            "category_name": "Netzteil"
         },
         {
             "repair_type": "PC Netzteil 700W",
-            "code": "N02"
+            "code": "N02",
+            "category": "N",
+            "category_name": "Netzteil"
         },
         {
             "repair_type": "Panzerglas inkl. Anbringung",
-            "code": "Z00"
+            "code": "Z00",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Folie anbringen",
-            "code": "Z01"
+            "code": "Z01",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Externe 2,5'' HDD USB 3.0 500GB",
-            "code": "Z02"
+            "code": "Z02",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Externe 2,5'' HDD USB 3.0 1TB",
-            "code": "Z03"
+            "code": "Z03",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Externe 2,5'' HDD USB 3.0 2TB",
-            "code": "Z04"
+            "code": "Z04",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Panzerglas Premium inkl. Anbringung",
-            "code": "Z05"
+            "code": "Z05",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Panzerglas Standard inkl. Anbringung",
-            "code": "Z06"
+            "code": "Z06",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Panzerglas Privacy inkl. Anbringung",
-            "code": "Z07"
+            "code": "Z07",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Bundle Panzerglas Premium",
-            "code": "Z08"
+            "code": "Z08",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Bundle Panzerglas Standard",
-            "code": "Z09"
+            "code": "Z09",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Hydrogel Folie inkl. Anbringung (vorne)",
-            "code": "Z10"
+            "code": "Z10",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Hydrogel Folie inkl. Anbringung (vorne)",
-            "code": "Z11"
+            "code": "Z11",
+            "category": "Z",
+            "category_name": "Zubehör"
         },
         {
             "repair_type": "Datensicherung",
-            "code": "S00"
+            "code": "S00",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenübertragung Standard",
-            "code": "S36"
+            "code": "S36",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenübertragung Premium",
-            "code": "S37"
+            "code": "S37",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "sichere Datenlöschung (Zertifikat)",
-            "code": "S38"
+            "code": "S38",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Simlock Entfernung",
-            "code": "S01"
+            "code": "S01",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenmigration",
-            "code": "S02"
+            "code": "S02",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Systemaktualisierung",
-            "code": "S03"
+            "code": "S03",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Neuinstallation OSX",
-            "code": "S04"
+            "code": "S04",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Neuinstallation iOS",
-            "code": "S05"
+            "code": "S05",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Neuinstallation Windows",
-            "code": "S06"
+            "code": "S06",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Neuinstallation Android",
-            "code": "S07"
+            "code": "S07",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Neuinstallation diverse Systeme",
-            "code": "S08"
+            "code": "S08",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Virenentfernung",
-            "code": "S09"
+            "code": "S09",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung 50GB",
-            "code": "S10"
+            "code": "S10",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung 250GB",
-            "code": "S11"
+            "code": "S11",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung bei logischem Schaden",
-            "code": "S12"
+            "code": "S12",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung 2TB",
-            "code": "S13"
+            "code": "S13",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung Mobile",
-            "code": "S35"
+            "code": "S35",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Board Swap Datenrettung",
-            "code": "S41"
+            "code": "S41",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Systemoptimierung",
-            "code": "S14"
+            "code": "S14",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "erweiterte Systemoptimierung",
-            "code": "S15"
+            "code": "S15",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Sicherheitscheck",
-            "code": "S16"
+            "code": "S16",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Einrichtung Datensicherung",
-            "code": "S17"
+            "code": "S17",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Geräteersteinrichtung",
-            "code": "S18"
+            "code": "S18",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Installation Software (Individuell)",
-            "code": "S19"
+            "code": "S19",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Softwareupdate",
-            "code": "S39"
+            "code": "S39",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Datenrettung komplex (externes Partnerlabor)",
-            "code": "S20"
+            "code": "S20",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Installation Parallels/BootCamp inkl. Windows",
-            "code": "S21"
+            "code": "S21",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Systemreparatur",
-            "code": "S22"
+            "code": "S22",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "GDATA Antivirus 1 Jahreslizenz",
-            "code": "S23"
+            "code": "S23",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Windows 7 Home Premium Lizenz (neu)",
-            "code": "S31"
+            "code": "S31",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Windows 7 Professional Lizenz (neu)",
-            "code": "S32"
+            "code": "S32",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Windows 10 Pro Lizenz",
-            "code": "S24"
+            "code": "S24",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Bullguard Internet Security 1 Jahr / 3 PCs",
-            "code": "S33"
+            "code": "S33",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Bullguard Internet Security 3 Monate Testversion",
-            "code": "S34"
+            "code": "S34",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "ESET Internet Security 1 Jahr / 1 PC",
-            "code": "S25"
+            "code": "S25",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "ESET Internet Security HaspaJoker 1 Jahr / 1 PC",
-            "code": "S26"
+            "code": "S26",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Office 2016 Home and Business - Original 1 PC",
-            "code": "S27"
+            "code": "S27",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Office 2016 Home and Business Mac - Original 1 PC",
-            "code": "S28"
+            "code": "S28",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Office 2016 Home and Student - Original 1 PC",
-            "code": "S29"
+            "code": "S29",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Office 2016 Home and Student Mac - Original 1 PC",
-            "code": "S30"
+            "code": "S30",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Systemfreischaltung (iCloud iOS und Android)",
-            "code": "S40"
+            "code": "S40",
+            "category": "S",
+            "category_name": "Software"
         },
         {
             "repair_type": "Wasserschadenanalyse",
-            "code": "A00"
+            "code": "A00",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Fallschadenanalyse",
-            "code": "A01"
+            "code": "A01",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "kostenpflichtige Analyse",
-            "code": "A02"
+            "code": "A02",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Kostenvoranschlag für Versicherungen",
-            "code": "A03"
+            "code": "A03",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Gutachten",
-            "code": "A04"
+            "code": "A04",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Online Analyse",
-            "code": "A05"
+            "code": "A05",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "kostenlose Analyse",
-            "code": "A06"
+            "code": "A06",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Express Pauschale",
-            "code": "A07"
+            "code": "A07",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "Gerätetest (Zertifikat)",
-            "code": "A08"
+            "code": "A08",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "kostenpflichtige Analyse verringert",
-            "code": "A09"
+            "code": "A09",
+            "category": "A",
+            "category_name": "Analysen"
         },
         {
             "repair_type": "geringer Aufwand (15 min)",
-            "code": "O00"
+            "code": "O00",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "mittlerer Aufwand (30 min)",
-            "code": "O01"
+            "code": "O01",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "großer Aufwand (60 min)",
-            "code": "O02"
+            "code": "O02",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "sehr großer Aufwand (90 min)",
-            "code": "O16"
+            "code": "O16",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "extremer Aufwand (120 min)",
-            "code": "O03"
+            "code": "O03",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Zusammenbau",
-            "code": "O04"
+            "code": "O04",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Garantieabwicklung",
-            "code": "O05"
+            "code": "O05",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Einbau weiterer Komponente",
-            "code": "O06"
+            "code": "O06",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Austauschgerät",
-            "code": "O07"
+            "code": "O07",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Gravur Standard",
-            "code": "O08"
+            "code": "O08",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Gravur Premium",
-            "code": "O09"
+            "code": "O09",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Gravur Individual",
-            "code": "O10"
+            "code": "O10",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Geräteverkauf (Reklamation)",
-            "code": "O11"
+            "code": "O11",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Geräteankauf (Bewertung)",
-            "code": "O12"
+            "code": "O12",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Bundle Servicepaket Standard",
-            "code": "O13"
+            "code": "O13",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Bundle Servicepaket Premium",
-            "code": "O14"
+            "code": "O14",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Bundle Servicepaket Standard",
-            "code": "O15"
+            "code": "O15",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Selbstbehalt HaspaJoker",
-            "code": "O17"
+            "code": "O17",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Selbstbehalt Wertgarantie",
-            "code": "O18"
+            "code": "O18",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Selbstbehalt S-Mobilgeräte",
-            "code": "O19"
+            "code": "O19",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         },
         {
             "repair_type": "Herstellerabwicklung",
-            "code": "O20"
+            "code": "O20",
+            "category": "O",
+            "category_name": "Sonstige Reparaturen"
         }
     ]
 }

@@ -131,7 +131,8 @@ app.get('/repairtypes', (req, res) => {
     }
     res.json(results);
   });
-});
+}); 
+
 // Get all devices with their repairs
 app.get('/devices', (req, res) => {
   const { search, limit = 20, offset = 0, brand } = req.query;
@@ -430,21 +431,21 @@ app.post('/admin/login', (req, res) => {
 
 
 app.post('/repairtypes', (req, res) => {
-  const { repair_type, code } = req.body;
+  const { repair_type, category, price } = req.body;
 
   if (!repair_type) {
     return res.status(400).json({ error: 'Repair type is required' });
   }
 
-  const query = 'INSERT INTO repairtypes (repair_type, code) VALUES (?, ?)';
-  db.query(query, [repair_type, code], (err, result) => {
+  const query = 'INSERT INTO repairtypes (repair_type, category, price) VALUES (?, ?, ?)';
+  db.query(query, [repair_type, category, price], (err, result) => {
     if (err) {
       console.error('Error adding repair type:', err);
       return res.status(500).json({ error: 'Failed to add repair type' });
-    }
+    } 
     res.status(201).json({
-      message: 'Repair type added successfully',
-      repair_type_id: result.insertId
+      repair_type_id: result.insertId,
+      message: 'Repair type added successfully'
     });
   });
 });
@@ -456,8 +457,16 @@ app.post('/repairtypes/batch', (req, res) => {
     return res.status(400).json({ error: 'Array of repair types is required' });
   }
 
-  const values = repair_types.map(item => [item.repair_type, item.code]);
-  const query = 'INSERT INTO repairtypes (repair_type, code) VALUES ?';
+  // Modified values mapping to include all fields
+  const values = repair_types.map(item => [
+    item.repair_type,
+    item.code,
+    item.category,
+    item.category_name
+  ]);
+  
+  // Updated query to include all columns
+  const query = 'INSERT INTO repairtypes (repair_type, code, category, category_name) VALUES ?';
 
   db.query(query, [values], (err, result) => {
     if (err) {
@@ -478,8 +487,13 @@ app.post('/devices/batch', (req, res) => {
     return res.status(400).json({ error: 'Array of devices is required' });
   }
 
-  const values = devices.map(device => [device.device_name, device.brand]);
-  const query = 'INSERT INTO devices (device_name, brand) VALUES ?';
+  const values = devices.map(device => [
+    device.device_name, 
+    device.brand,
+    device.category || 'O'
+  ]);
+  
+  const query = 'INSERT INTO devices (device_name, brand, category) VALUES ?';
 
   db.query(query, [values], (err, result) => {
     if (err) {
@@ -503,10 +517,10 @@ app.post('/device-repairs/batch', (req, res) => {
   const values = device_repairs.map(repair => [
     repair.device_id,
     repair.repair_type_id,
-    repair.price
+    repair.price,
   ]);
 
-  const query = 'INSERT INTO device_repairs (device_id, repair_type_id, price) VALUES ?';
+  const query = 'INSERT INTO device_repairs (device_id, repair_type_id, price, category) VALUES ?';
 
   db.query(query, [values], (err, result) => {
     if (err) {
