@@ -2,18 +2,25 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const crypto = require('crypto'); // Add this for password hashing
+const https = require('https');
+const fs = require('fs');
 
 // Initialize express app
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MySQL database connection
+const options = {
+  key: fs.readFileSync('/var/www/clients/client1/web48/home/c334458admin/backend/key.pem'), // Replace with the path to your private key
+  cert: fs.readFileSync('/var/www/clients/client1/web48/home/c334458admin/backend/cert.pem') // Replace with the path to your certificate
+};
+
+// MySQL database connectionw
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'repair_dashboard'
+  user: 'c0lennox',
+  password: 'Liaa2006!',
+  database: 'c1lennox'
 });
 
 // Connect to the database
@@ -383,9 +390,11 @@ app.post('/register-admin', (req, res) => {
 
 // Start the serverww
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+https.createServer(options, app).listen(PORT, () => {
+  console.log(`Server running on https://localhost:${PORT}`);
 });
+
 
 // Enhanced admin aut hentication endpoint
 app.post('/admin/login', (req, res) => {
