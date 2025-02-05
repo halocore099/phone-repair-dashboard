@@ -28,7 +28,7 @@ const RepairDashboard = () => {
     const devicesWithRepairs = await Promise.all(
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
-        const repairResponse = await axios.get(`http://localhost:3001/devices/${deviceId}/repairs`);
+        const repairResponse = await axios.get(`http://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`);
         return repairResponse.data.map(repair => ({
           ID: device.device_id,
           'Device Name': device.device_name,
@@ -42,7 +42,7 @@ const RepairDashboard = () => {
     // Add this function to help with registration
 const registerAdmin = async () => {
   try {
-    const response = await axios.post('http://localhost:3001/register-admin', {
+    const response = await axios.post('http://k98j70.meinserver.io:3001/register-admin', {
       email: adminEmail,
       password: adminPassword 
     });
@@ -82,7 +82,7 @@ const registerAdmin = async () => {
     const devicesWithRepairs = await Promise.all(
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
-        const repairResponse = await axios.get(`http://localhost:3001/devices/${deviceId}/repairs`);
+        const repairResponse = await axios.get(`http://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`);
         return repairResponse.data.map(repair => ({
           ID: device.device_id,
           'Device Name': device.device_name,
@@ -121,7 +121,7 @@ const registerAdmin = async () => {
 
     const loadDevices = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/devices');
+      const response = await axios.get('http://k98j70.meinserver.io:3001/devices');
       setDevices(response.data);
     } catch (error) {
       console.error('Error loading devices:', error);
@@ -182,16 +182,17 @@ const registerAdmin = async () => {
 
         let response;
         if (selectedDevices.length > 0) {
-          response = await axios.delete(`http://localhost:3001/devices/batch`, {
+          response = await axios.delete(`http://k98j70.meinserver.io:3001/devices/batch`, {
             data: { deviceIds: selectedDevices },
             headers
           });
         } else {
           response = await axios.delete(
-            `http://localhost:3001/devices/${selectedDevice.device_id}`,
+            `http://k98j70.meinserver.io:3001/devices/${selectedDevice.device_id}`,
             { headers }
           );
         }
+    
 
         if (response.data) {
           await loadDevices();
@@ -253,7 +254,7 @@ const registerAdmin = async () => {
     {showAdminModal && <AdminModal />}
   const handleAddDevice = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/devices', newDevice);
+      const response = await axios.post('http://k98j70.meinserver.io:3001/devices', newDevice);
       setDevices([
         ...devices,
         {
@@ -271,7 +272,7 @@ const registerAdmin = async () => {
 
   const handleSaveRepairs = async (deviceId, repairs) => {
     try {
-      await axios.put(`http://localhost:3001/devices/${deviceId}/repairs`, { repairs });
+      await axios.put(`http://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`, { repairs });
 
       setDevices(devices.map(device =>
         device.device_id === deviceId ? { ...device, repairs } : device
@@ -295,7 +296,7 @@ const registerAdmin = async () => {
 
   const handleRemoveRepair = async (deviceId, repairId) => {
     try {
-      await axios.delete(`http://localhost:3001/devices/${deviceId}/repairs/${repairId}`);
+      await axios.delete(`http://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairId}`);
 
       setDevices(devices.map(device => {
         if (device.device_id === deviceId) {
@@ -317,7 +318,7 @@ const registerAdmin = async () => {
     useEffect(() => {
       const fetchRepairs = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/devices/${device.device_id}/repairs`);
+          const response = await axios.get(`http://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`);
           setRepairs(response.data);
         } catch (error) {
           console.error('Error fetching repairs:', error);
@@ -404,7 +405,7 @@ const registerAdmin = async () => {
           useEffect(() => {
             const fetchRepairTypes = async () => {
               try {
-                const response = await axios.get('http://localhost:3001/repairtypes');
+                const response = await axios.get('http://k98j70.meinserver.io:3001/repairtypes');
                 setRepairTypes(response.data);
               } catch (error) {
                 console.error('Error fetching repair types:', error);
@@ -417,7 +418,7 @@ const registerAdmin = async () => {
           useEffect(() => {
             const fetchRepairs = async () => {
               try {
-                const response = await axios.get(`http://localhost:3001/devices/${device.device_id}/repairs`);
+                const response = await axios.get(`http://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`);
                 setEditedRepairs(response.data);
               } catch (error) {
                 console.error('Error fetching repairs:', error);
@@ -447,7 +448,7 @@ const registerAdmin = async () => {
               }));
 
               await handleSaveRepairs(device.device_id, formattedRepairs);
-              const response = await axios.get('http://localhost:3001/devices');
+              const response = await axios.get('http://k98j70.meinserver.io:3001/devices');
               setDevices(response.data);
               onClose();
             } catch (error) {
