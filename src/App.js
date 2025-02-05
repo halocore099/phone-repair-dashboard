@@ -1,13 +1,15 @@
 // src/App.js
 import React from 'react';
-import RepairDashboard from './RepairDashboard'; // Import the RepairDashboard component
+import { ThemeProvider } from 'next-themes';
+import RepairDashboard from './RepairDashboard';
 
 const App = () => {
   return (
-    <div>
-      <h1>Phone Repair Management Dashboard</h1>
-      <RepairDashboard />
-    </div>
+    <ThemeProvider attribute="class">
+      <div className="min-h-screen transition-colors duration-200 dark:bg-gray-900">
+        <RepairDashboard />
+      </div>
+    </ThemeProvider>
   );
 };
 

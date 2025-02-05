@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useTheme } from 'next-themes';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/Card';
 import Button from './components/ui/Button';
 import Input from './components/ui/Input';
-import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Moon, Sun } from 'lucide-react';
 
 const RepairDashboard = () => {
+  const ThemeToggle = () => {
+    const { theme, setTheme } = useTheme();
+    return (
+      <Button
+        variant="outline"
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className="ml-2"
+      >
+        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+      </Button>
+    );
+  };
+
   const [devices, setDevices] = useState([]);
   const [adminError, setAdminError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +36,8 @@ const RepairDashboard = () => {
     brand: ""
   });
   
+  
+
   const handleExportCSV = async () => {
     if (selectedDevices.length === 0) return;
   
@@ -107,7 +123,7 @@ const registerAdmin = async () => {
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
       const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: priceCol })];
       if (cell && cell.v) {
-        cell.z = '$#,##0.00'; // Apply currency format
+        cell.z = '€#,##0.00'; // Apply currency format
       }
     }
   
@@ -364,7 +380,7 @@ const registerAdmin = async () => {
                     <tr key={repair.repair_type_id}>
                       <td className="px-6 py-4 text-sm text-gray-900">{repair.repair_type}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        ${!isNaN(price) ? price.toFixed(2) : '0.00'}
+                        €{!isNaN(price) ? price.toFixed(2) : '0.00'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <input
@@ -500,41 +516,44 @@ const registerAdmin = async () => {
                       </Button>
                     </div>
                   ))}
-
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-full">
-                      <Input
-                        type="text"
-                        placeholder="Search repair types..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full"
-                      />
-                      <select
-                        value={selectedRepairType ? selectedRepairType.repair_type_id : ''}
-                        onChange={(e) => {
-                          const selectedType = repairTypes.find(r => r.repair_type_id === parseInt(e.target.value));
-                          setSelectedRepairType(selectedType);
-                        }}
-                        className="w-full mt-2 border p-2"
-                      >
-                        <option value="">Select Repair Type</option>
-                        {Object.entries(REPAIR_CATEGORIES).map(([category, categoryName]) => (
-                          <optgroup key={category} label={`${category} - ${categoryName}`}>
-                            {filteredRepairTypes
-                              .filter(repair => repair.category === category)
-                              .map(repair => (
-                                <option key={repair.repair_type_id} value={repair.repair_type_id}>
-                                  {repair.repair_type} - ${repair.price}
-                                </option>
-                              ))}
-                          </optgroup>
-                        ))}
-                      </select>
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-full">
+                        <Input
+                          type="text"
+                          placeholder="Search or select repair type..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full mb-0"
+                        />
+                        <div className="mt-1 w-full max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900">
+                          {Object.entries(REPAIR_CATEGORIES).map(([category, categoryName]) => {
+                            const repairs = filteredRepairTypes.filter(repair => repair.category === category);
+                            if (repairs.length === 0) return null;
+                          
+                            return (
+                              <div key={category} className="p-2">
+                                <div className="font-medium text-gray-700 dark:text-gray-300">
+                                  {category} - {categoryName}
+                                </div>
+                                {repairs.map(repair => (
+                                  <div
+                                    key={repair.repair_type_id}
+                                    className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    onClick={() => {
+                                      setSelectedRepairType(repair);
+                                      setSearchTerm('');
+                                    }}
+                                  >
+                                    {repair.repair_type} - €{repair.price}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <Button onClick={handleAddRepair}>Add Repair</Button>
                     </div>
-                    <Button onClick={handleAddRepair}>Add Repair</Button>
-                  </div>
-
                   <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button onClick={handleSave}>Save Changes</Button>
@@ -551,13 +570,16 @@ const registerAdmin = async () => {
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
               <CardTitle>Phone Repair Management Dashboard</CardTitle>
-              <Button
-                onClick={() => setShowAddDevice(!showAddDevice)}
-                className="flex items-center gap-2"
-              >
-                <Plus size={16} />
-                Add Device
-              </Button>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <Button
+                  onClick={() => setShowAddDevice(!showAddDevice)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Add Device
+                </Button>
+              </div>
             </div>
             <div className="flex gap-4">
               <Input
@@ -576,9 +598,11 @@ const registerAdmin = async () => {
                   brand && <option key={brand} value={brand}>{brand}</option>
                 ))}
               </select>
+              <span className="text-sm text-gray-600 dark:text-gray-300 self-center">
+                Total Devices: {devices.length}
+              </span>
             </div>
           </CardHeader>
-
           {selectedDevices.length > 0 && (
             <div className="bg-gray-50 p-4 mb-4 flex items-center justify-between">
               <span className="text-sm text-gray-700">
@@ -628,10 +652,10 @@ const registerAdmin = async () => {
             )}
           
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
                       <input
                         type="checkbox"
                         onChange={(e) => {
@@ -644,32 +668,32 @@ const registerAdmin = async () => {
                         checked={selectedDevices.length === filteredDevices.length}
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">ID</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Device</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Brand</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Repairs</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">ID</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Device</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Brand</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Repairs</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredDevices.map((device) => (
-                    <tr key={device.device_id}>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                    <tr key={device.device_id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                         <input
                           type="checkbox"
                           checked={selectedDevices.includes(device.device_id)}
                           onChange={() => handleDeviceSelect(device.device_id)}
                         />
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{device.device_id}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{device.device_name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{device.brand}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{device.device_id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{device.device_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{device.brand}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                         {device.repair_count !== undefined 
                           ? `${device.repair_count} Repair(s)` 
                           : "No repairs"}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                         <Button
                           variant="outline"
                           className="mr-2" 
