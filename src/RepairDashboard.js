@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/Card';
 import Button from './components/ui/Button';
 import Input from './components/ui/Input';
-import { Plus, Edit, Eye, Trash2, Moon, Sun } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Moon, Sun, ChevronDown } from 'lucide-react';
 
 const RepairDashboard = () => {
   const ThemeToggle = () => {
@@ -525,34 +525,46 @@ const registerAdmin = async () => {
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="w-full mb-0"
                         />
-                        <div className="mt-1 w-full max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900">
-                          {Object.entries(REPAIR_CATEGORIES).map(([category, categoryName]) => {
-                            const repairs = filteredRepairTypes.filter(repair => repair.category === category);
-                            if (repairs.length === 0) return null;
-                          
-                            return (
-                              <div key={category} className="p-2">
-                                <div className="font-medium text-gray-700 dark:text-gray-300">
-                                  {category} - {categoryName}
-                                </div>
-                                {repairs.map(repair => (
-                                  <div
-                                    key={repair.repair_type_id}
-                                    className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    onClick={() => {
-                                      setSelectedRepairType(repair);
-                                      setSearchTerm('');
-                                    }}
-                                  >
-                                    {repair.repair_type} - €{repair.price}
+                        <button
+                          type="button"
+                          onClick={() => setSearchTerm(searchTerm ? '' : ' ')} // Space triggers dropdown
+                          className="absolute right-2 top-1/2 -translate-y-1/2"
+                        >
+                          <ChevronDown size={20} />
+                        </button>
+                        {searchTerm && (
+                          <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900 shadow-lg">
+                            {Object.entries(REPAIR_CATEGORIES).map(([category, categoryName]) => {
+                              const repairs = filteredRepairTypes.filter(repair => 
+                                repair.category === category && 
+                                repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
+                              );
+                              if (repairs.length === 0) return null;
+                            
+                              return (
+                                <div key={category} className="p-2">
+                                  <div className="font-medium text-gray-700 dark:text-gray-300">
+                                    {category} - {categoryName}
                                   </div>
-                                ))}
-                              </div>
-                            );
-                          })}
-                        </div>
+                                  {repairs.map(repair => (
+                                    <div
+                                      key={repair.repair_type_id}
+                                      className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                                      onClick={() => {
+                                        setSelectedRepairType(repair);
+                                        setSearchTerm('');
+                                      }}
+                                    >
+                                      {repair.repair_type} - €{repair.price}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                      <Button onClick={handleAddRepair}>Add Repair</Button>
+                      <Button onClick={handleAddRepair}>Add</Button>
                     </div>
                   <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
@@ -569,7 +581,7 @@ const registerAdmin = async () => {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
-              <CardTitle>Phone Repair Management Dashboard</CardTitle>
+              <CardTitle>Repair Management Dashboard</CardTitle>
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 <Button
@@ -591,11 +603,11 @@ const registerAdmin = async () => {
               <select
                 value={brandFilter}
                 onChange={(e) => setBrandFilter(e.target.value)}
-                className="border p-2 rounded"
+                className="border p-2 rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"
               >
                 <option value="">All Brands</option>
                 {[...new Set(devices.map(device => device.brand))].map(brand => (
-                  brand && <option key={brand} value={brand}>{brand}</option>
+                  brand && <option key={brand} value={brand} className="dark:bg-gray-700">{brand}</option>
                 ))}
               </select>
               <span className="text-sm text-gray-600 dark:text-gray-300 self-center">
@@ -604,22 +616,22 @@ const registerAdmin = async () => {
             </div>
           </CardHeader>
           {selectedDevices.length > 0 && (
-            <div className="bg-gray-50 p-4 mb-4 flex items-center justify-between">
-              <span className="text-sm text-gray-700">
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 mb-4 flex items-center justify-between border dark:border-gray-700 rounded-lg">
+              <span className="text-sm text-gray-700 dark:text-gray-300">
                 {selectedDevices.length} device(s) selected
               </span>
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
                   onClick={handleExportCSV}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 dark:hover:bg-gray-700 dark:text-gray-300"
                 >
                   Export CSV
                 </Button>
                 <Button
-                    variant="outline"
-                    onClick={handleExportExcel}
-                    className="flex items-center gap-2"
+                  variant="outline"
+                  onClick={handleExportExcel}
+                  className="flex items-center gap-2 dark:hover:bg-gray-700 dark:text-gray-300"
                 >
                   Export Excel
                 </Button>
