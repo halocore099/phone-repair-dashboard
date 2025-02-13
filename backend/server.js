@@ -198,6 +198,60 @@ app.get('/devices/:device_id/repairs', authenticate, (req, res) => {
   });
 });
 
+app.get('/repairtypes', authenticate, (req, res) => {
+  const query = 'SELECT * FROM repairtypes';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching repair types:', err);
+      return res.status(500).json({ error: 'Failed to fetch repair types' });
+    }
+    res.json(results);
+  });
+});
+
+app.post('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
+  const device_id = parseInt(req.params.device_id, 10);
+  const { repair_type_id, price } = req.body;
+
+  const query = 'INSERT INTO device_repairs (device_id, repair_type_id, price) VALUES (?, ?, ?)';
+  db.query(query, [device_id, repair_type_id, price], (err, result) => {
+    if (err) {
+      console.error('Error adding repair to device:', err);
+      return res.status(500).json({ error: 'Failed to add repair to device' });
+    }
+    res.status(201).json({ message: 'Repair added to device successfully' });
+  });
+});
+
+app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
+  const device_id = parseInt(req.params.device_id, 10);
+  const repair_type_id = parseInt(req.params.repair_type_id, 10);
+  const { price } = req.body;
+
+  const query = 'UPDATE device_repairs SET price = ? WHERE device_id = ? AND repair_type_id = ?';
+  db.query(query, [price, device_id, repair_type_id], (err, result) => {
+    if (err) {
+      console.error('Error updating repair for device:', err);
+      return res.status(500).json({ error: 'Failed to update repair for device' });
+    }
+    res.json({ message: 'Repair updated successfully' });
+  });
+});
+
+app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
+  const device_id = parseInt(req.params.device_id, 10);
+  const repair_type_id = parseInt(req.params.repair_type_id, 10);
+
+  const query = 'DELETE FROM device_repairs WHERE device_id = ? AND repair_type_id = ?';
+  db.query(query, [device_id, repair_type_id], (err, result) => {
+    if (err) {
+      console.error('Error removing repair from device:', err);
+      return res.status(500).json({ error: 'Failed to remove repair from device' });
+    }
+    res.json({ message: 'Repair removed successfully' });
+  });
+});
+
 // Start the server
 const PORT = process.env.PORT || 3001;
 https.createServer(options, app).listen(PORT, () => {
