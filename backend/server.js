@@ -32,7 +32,7 @@ db.connect((err) => {
 });
 
 // User Registration endpoint
-app.post('/register', (req, res) => {
+app.post('/register', authenticate, authorize('Sudo'), (req, res) => {
   const { username, password, role, registrationToken } = req.body;
 
   if (registrationToken !== REGISTRATION_TOKEN) {
@@ -121,8 +121,8 @@ app.get('/devices', authenticate, (req, res) => {
   });
 });
 
-// Add a new device (protected route, requires Read&Write or Sudo role)
-app.post('/devices', authenticate, authorize('Read&Write'), (req, res) => {
+// Add a new device (protected route)
+app.post('/devices', authenticate, authorize('Read&Write', 'Sudo'), (req, res) => {
   const { device_name, brand } = req.body;
   const query = 'INSERT INTO devices (device_name, brand) VALUES (?, ?)';
 
@@ -133,7 +133,7 @@ app.post('/devices', authenticate, authorize('Read&Write'), (req, res) => {
     }
     res.status(201).json({
       message: 'Device added successfully',
-      device_id: result.insertId
+      device_id: reslult.insertId
     });
   });
 });
@@ -199,7 +199,20 @@ app.get('/devices/:device_id/repairs', authenticate, (req, res) => {
 });
 
 app.get('/repairtypes', authenticate, (req, res) => {
-  const query = 'SELECT * FROM repairtypes';
+  const query = `
+    SELECT 
+      repair_type_id,
+      repair_type,
+      code,
+      category,
+      category_name
+    FROM 
+      repairtypes
+    ORDER BY 
+      category,
+      repair_type
+  `;
+
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching repair types:', err);
@@ -208,6 +221,8 @@ app.get('/repairtypes', authenticate, (req, res) => {
     res.json(results);
   });
 });
+
+
 
 app.post('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
@@ -257,3 +272,56 @@ const PORT = process.env.PORT || 3001;
 https.createServer(options, app).listen(PORT, () => {
   console.log(`Server running on https://localhost:${PORT}`);
 });  
+
+// Update the PUT endpoint to handle repair updates
+app.put('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
+  const device_id = parseInt(req.params.device_id, 10);
+  const { repairs } = req.body;
+
+  Promise.all(
+    repairs.map(repair => 
+      new Promise((resolve, reject) => {
+        const query = ` 
+          INSERT INTO device_repairs (device_id, repair_type_id, price, sku) 
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE price = VALUES(price), sku = VALUES(sku)
+        `;
+        db.query(query, [device_id, repair.repair_type_id, repair.price, repair.sku], (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        });
+      })
+    )
+  )
+  .then(() => {
+    res.json({ message: 'Repairs updated successfully' });
+  })
+  .catch(error => {
+    console.error('Error updating repairs:', error);
+    res.status(500).json({ error: 'Failed to update repairs' });
+  });
+});
+
+
+app.get('/users', authenticate, authorize('Sudo'), (req, res) => {
+  const query = 'SELECT id, username, role FROM users';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to fetch users' });
+    }
+    res.json(results);
+  });
+});
+
+app.put('/users/:userId/role', authenticate, authorize('Sudo'), (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  
+  const query = 'UPDATE users SET role = ? WHERE id = ?';
+  db.query(query, [role, userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to update user role' });
+    }
+    res.json({ message: 'User role updated successfully' });
+  });
+});
