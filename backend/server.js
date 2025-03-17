@@ -31,6 +31,7 @@ db.connect((err) => {
   console.log('Connected to the database');
 });
 
+
 // User Registration endpoint
 app.post('/register', authenticate, authorize('Sudo'), (req, res) => {
   const { username, password, role, registrationToken } = req.body;
@@ -49,6 +50,7 @@ app.post('/register', authenticate, authorize('Sudo'), (req, res) => {
     });
   });
 });
+
 
 // User Login endpoint
 app.post('/login', (req, res) => {
@@ -71,6 +73,7 @@ app.post('/login', (req, res) => {
     res.json({ token, role: user.role });
   });
 });
+
 
 // Get all devices (protected route)
 app.get('/devices', authenticate, (req, res) => {
@@ -121,8 +124,9 @@ app.get('/devices', authenticate, (req, res) => {
   });
 });
 
+
 // Add a new device (protected route)
-app.post('/devices', authenticate, authorize('Read&Write', 'Sudo'), (req, res) => {
+app.post('/devices', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
   const { device_name, brand } = req.body;
   const query = 'INSERT INTO devices (device_name, brand) VALUES (?, ?)';
 
@@ -133,10 +137,11 @@ app.post('/devices', authenticate, authorize('Read&Write', 'Sudo'), (req, res) =
     }
     res.status(201).json({
       message: 'Device added successfully',
-      device_id: reslult.insertId
+      device_id: result.insertId
     });
   });
 });
+
 
 // Delete a device (protected route, requires Sudo role)
 app.delete('/devices/:device_id', authenticate, authorize('Sudo'), (req, res) => {
@@ -170,6 +175,7 @@ app.delete('/devices/:device_id', authenticate, authorize('Sudo'), (req, res) =>
     });
   });
 });
+
 
 // Get repairs for a specific device (protected route)
 app.get('/devices/:device_id/repairs', authenticate, (req, res) => {
@@ -223,7 +229,6 @@ app.get('/repairtypes', authenticate, (req, res) => {
 });
 
 
-
 app.post('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
   const { repair_type_id, price } = req.body;
@@ -237,6 +242,7 @@ app.post('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (
     res.status(201).json({ message: 'Repair added to device successfully' });
   });
 });
+
 
 app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
@@ -253,6 +259,7 @@ app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('
   });
 });
 
+
 app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
   const repair_type_id = parseInt(req.params.repair_type_id, 10);
@@ -264,14 +271,16 @@ app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authoriz
       return res.status(500).json({ error: 'Failed to remove repair from device' });
     }
     res.json({ message: 'Repair removed successfully' });
-  });
+  }); 
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 3001;
 https.createServer(options, app).listen(PORT, () => {
   console.log(`Server running on https://localhost:${PORT}`);
 });  
+
 
 // Update the PUT endpoint to handle repair updates
 app.put('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
@@ -312,6 +321,7 @@ app.get('/users', authenticate, authorize('Sudo'), (req, res) => {
     res.json(results);
   });
 });
+
 
 app.put('/users/:userId/role', authenticate, authorize('Sudo'), (req, res) => {
   const { userId } = req.params;

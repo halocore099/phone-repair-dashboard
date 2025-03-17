@@ -288,82 +288,107 @@ const RepairDashboard = () => {
     const [selectedRepairType, setSelectedRepairType] = useState(null);
     const [repairTypes, setRepairTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-
-   
-    
-
+  
+    // Fetch repair types and repairs when the modal opens
     useEffect(() => {
-      const fetchRepairTypes = async () => { 
+      const fetchRepairTypes = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get('https://k98j70.meinserver.io:3001/repairtypes',{
+          const response = await axios.get('https://k98j70.meinserver.io:3001/repairtypes', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setRepairTypes(response.data);
         } catch (error) {
           console.error('Error fetching repair types:', error);
         }
-      };  
-
+      };
+  
       fetchRepairTypes();
     }, []);
-
+  
     useEffect(() => {
       const fetchRepairs = async () => {
         try {
           const token = localStorage.getItem('token');
           const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, {
-            headers: { Authorization: `Bearer ${token}` } 
+            headers: { Authorization: `Bearer ${token}` }
           });
           setEditedRepairs(response.data);
         } catch (error) {
           console.error('Error fetching repairs:', error);
         }
       };
-
+  
       fetchRepairs();
     }, [device.device_id]);
-
+  
+    // Handle SKU changes
+    const handleSKUChange = (repairTypeId, skuValue) => {
+      const updatedRepairs = editedRepairs.map(repair => {
+        if (repair.repair_type_id === repairTypeId) {
+          return { ...repair, sku: skuValue };
+        }
+        return repair;
+      });
+      setEditedRepairs(updatedRepairs);
+    };
+  
+    // Handle adding a repair
     const handleAddRepair = () => {
       if (selectedRepairType) {
         const newRepair = {
           repair_type_id: selectedRepairType.repair_type_id,
           repair_type: selectedRepairType.repair_type,
           price: selectedRepairType.price,
-        }; 
+          sku: "", // Initialize SKU as empty
+        };
         setEditedRepairs([...editedRepairs, newRepair]);
         setSelectedRepairType(null);
       }
     };
-      const handleSave = async () => {
-        try {
-          const token = localStorage.getItem('token');
-          const formattedRepairs = editedRepairs.map(repair => ({
-            repair_type_id: repair.repair_type_id,
-            price: repair.price
-          }));
-
-          await axios.put(
-            `https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, 
-            { repairs: formattedRepairs },
-            { headers: { Authorization: `Bearer ${token}` }}
-          );
-
-          await loadDevices();
-          onClose();
-        } catch (error) {
-          console.error('Error saving repairs:', error);
-        }
-      };
-      
-    const handleRemoveRepair = async (deviceId, repairTypeId) => {
-      const token = localStorage.getItem('token');
-      await axios.delete(
-        `https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairTypeId}`,
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
-      setEditedRepairs(editedRepairs.filter(repair => repair.repair_type_id !== repairTypeId));
+  
+    // Save changes
+    const handleSave = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const formattedRepairs = editedRepairs.map(repair => ({
+          repair_type_id: repair.repair_type_id,
+          price: repair.price,
+          sku: repair.sku, // Include SKU in the payload
+        }));
+  
+        await axios.put(
+          `https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`,
+          { repairs: formattedRepairs },
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+  
+        await loadDevices();
+        onClose();
+      } catch (error) {
+        console.error('Error saving repairs:', error);
+      }
     };
+  
+    // Handle removing a repair
+    const handleRemoveRepair = async (deviceId, repairTypeId) => {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(
+          `https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairTypeId}`,
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+        // Refresh the repairs list after deletion
+        const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEditedRepairs(response.data);
+      } catch (error) {
+        console.error('Error removing repair:', error);
+      }
+    };
+  
+    // Group repair types by category
     const groupedRepairTypes = Object.entries(
       repairTypes.reduce((acc, repair) => {
         const category = repair.category || 'O';
@@ -377,13 +402,14 @@ const RepairDashboard = () => {
         return acc;
       }, {})
     );
-
-    const filteredRepairTypes = repairTypes.filter(repair => 
+  
+    // Filter repair types based on search term
+    const filteredRepairTypes = repairTypes.filter(repair =>
       repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
+  
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"> 
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">
@@ -392,80 +418,100 @@ const RepairDashboard = () => {
             <Button variant="ghost" onClick={onClose}>×</Button>
           </div>
           <div className="space-y-4">
-            {editedRepairs.map((repair, index) => (
-              <div key={repair.repair_type_id} className="flex items-center gap-4">
-                <span className="min-w-[200px]">{repair.repair_type}</span>
-                <Input
-                  type="number"
-                  value={repair.price}  
-                  onChange={(e) => {
-                    const newRepairs = [...editedRepairs];
-                    newRepairs[index] = {
-                      ...repair,
-                      price: parseFloat(e.target.value) || 0
-                    };
-                    setEditedRepairs(newRepairs); 
-                  }}
-                  className="w-32"
-                />  
-                <Button variant="outline" onClick={() => handleRemoveRepair(device.device_id, repair.repair_type_id)}>
-                  Remove
-                </Button>
-              </div>
-            ))}
-              <div className="flex items-center gap-4">
-                <div className="relative w-full">
-                  <Input
-                    type="text"
-                    placeholder="Search or select repair type..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full mb-0"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm(searchTerm ? '' : ' ')} // Space triggers dropdown
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                  >
-                    <ChevronDown size={20} />
-                  </button>
-                  {searchTerm && (
-                    <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900 shadow-lg">
-                      {groupedRepairTypes.map(([category, data]) => {
-                        const filteredRepairs = data.repairs.filter(repair =>
-                          repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
-                        );
-                        if (filteredRepairs.length === 0) return null;
-
-                        return (
-                          <div key={category} className="p-2">
-                            <div className="font-medium text-gray-700 dark:text-gray-300">
-                              {category} - {data.name}
-                            </div>
-                            {filteredRepairs.map(repair => (
-                              <div
-                                key={repair.repair_type_id}
-                                className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
-                                onClick={() => {
-                                  setSelectedRepairType(repair);
-                                  setSearchTerm('');
-                                }}
-                              >
-                                {repair.repair_type} - €{repair.price}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+            {editedRepairs.map((repair) => {
+              const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
+              const skuPrefix = "O-";
+              const skuSuffix = repairType?.code || "";
+  
+              return (
+                <div key={repair.repair_type_id}>
+                  <div className="flex items-center gap-4">
+                    <span className="min-w-[200px]">{repair.repair_type}</span>
+                    <Input
+                      type="number"
+                      value={repair.price}
+                      onChange={(e) => {
+                        const newRepairs = [...editedRepairs];
+                        newRepairs.find(r => r.repair_type_id === repair.repair_type_id).price = parseFloat(e.target.value) || 0;
+                        setEditedRepairs(newRepairs);
+                      }}
+                      className="w-32"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => handleRemoveRepair(device.device_id, repair.repair_type_id)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span>SKU:</span>
+                    <Input
+                      type="text"
+                      placeholder="Enter SKU"
+                      value={repair.sku || ""}
+                      onChange={(e) => handleSKUChange(repair.repair_type_id, e.target.value)}
+                      className="w-48"
+                    />
+                    <span>{skuPrefix}{repair.sku || ""}{skuSuffix}</span>
+                  </div>
                 </div>
-                <Button onClick={handleAddRepair}>Add</Button>
+              );
+            })}
+            {/* Add repair type dropdown and other existing code */}
+            <div className="flex items-center gap-4">
+              <div className="relative w-full">
+                <Input
+                  type="text" 
+                  placeholder="Search or select repair type..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full mb-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm(searchTerm ? '' : ' ')} // Space triggers dropdown
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                >
+                  <ChevronDown size={20} />
+                </button>
+                {searchTerm && (
+                  <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900 shadow-lg">
+                    {groupedRepairTypes.map(([category, data]) => {
+                      const filteredRepairs = data.repairs.filter(repair =>
+                        repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
+                      );
+                      if (filteredRepairs.length === 0) return null;
+  
+                      return (
+                        <div key={category} className="p-2">
+                          <div className="font-medium text-gray-700 dark:text-gray-300">
+                            {category} -  {data.name}
+                          </div>
+                          {filteredRepairs.map(repair => (
+                            <div
+                              key={repair.repair_type_id}
+                              className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" 
+                              onClick={() => {
+                                setSelectedRepairType(repair);
+                                setSearchTerm('');
+                              }}
+                            >
+                                {repair.repair_type} - €{repair.price}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button onClick={handleAddRepair}>Add</Button>
             </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
         </div>
       </div>
@@ -497,7 +543,7 @@ const RepairDashboard = () => {
         
         await axios.post(
           'https://k98j70.meinserver.io:3001/register',
-          { 
+          {  
             username: newUser.username, 
             password: newUser.password, 
             role: newUser.role,
@@ -556,7 +602,7 @@ const RepairDashboard = () => {
         </div>
 
         {showAddUser && (
-          <div className="mb-4 p-4 border rounded-lg dark:border-gray-700">
+          <div className="mb-4 p-4 bord   er rounded-lg dark:border-gray-700">
             <div className="grid grid-cols-3 gap-4">
               <Input
                 placeholder="Username"
@@ -576,7 +622,7 @@ const RepairDashboard = () => {
               >
                 {roles.map(role => (
                   <option key={role} value={role}>{role}</option>
-                ))}
+                ))} 
               </select>
             </div>
             <div className="flex justify-end mt-4">

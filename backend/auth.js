@@ -22,9 +22,9 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// Middleware to check user role
-const authorize = (role) => (req, res, next) => {
-  if (req.user.role !== role) {
+// Middleware to check user role (updated to accept multiple roles)
+const authorize = (allowedRoles) => (req, res, next) => {
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
   }
   next();
