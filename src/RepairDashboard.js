@@ -779,14 +779,15 @@ const RepairDashboard = () => {
         {selectedDevices.length > 0 && (
           <div className="bg-gray-50 dark:bg-gray-800 p-4 mb-4 flex items-center justify-between border dark:border-gray-700 rounded-lg">
             <span className="text-sm text-gray-700 dark:text-gray-300">
-              {selectedDevices.length} device(s) selected
+              {selectedDevices.length} Device(s) selected
             </span>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 onClick={handleExportCSV}
                 className="flex items-center gap-2 dark:hover:bg-gray-700 dark:text-gray-300"
-              >wd
+              >
+                Export CSV
               </Button>
               <Button
                 variant="outline"

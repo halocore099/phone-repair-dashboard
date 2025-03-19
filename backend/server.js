@@ -132,7 +132,7 @@ app.post('/devices', authenticate, authorize(['Read&Write', 'Sudo']), (req, res)
 
   db.query(query, [device_name, brand], (err, result) => {
     if (err) {
-      console.error('Error adding device:', err);
+      console.error('Error adding device:', err); 
       return res.status(500).json({ error: 'Failed to add device' });
     }
     res.status(201).json({
@@ -161,7 +161,7 @@ app.delete('/devices/:device_id', authenticate, authorize('Sudo'), (req, res) =>
         return res.status(500).json({ error: 'Failed to delete device' });
       }
 
-      if (result.affectedRows === 0) {
+      if (result.affectedRows === 0) {  
         return res.status(404).json({
           error: 'Device not found',
           message: 'No device matched the given device ID'
@@ -189,7 +189,7 @@ app.get('/devices/:device_id/repairs', authenticate, (req, res) => {
     FROM
       device_repairs dr
     JOIN
-      repairtypes rt ON dr.repair_type_id = rt.repair_type_id   
+      repairtypes rt ON dr.repair_type_id = rt.repair_type_id
     WHERE
       dr.device_id = ?
   `;
