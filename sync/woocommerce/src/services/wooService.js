@@ -20,9 +20,27 @@ const wooCommerce = axios.create({
 async function fetchWooCommerceProducts() {
     try {
       logger.debug('Fetching products from WooCommerce...');
-      const response = await limiter.schedule(() => wooCommerce.get('/products'));
-      logger.debug(`Fetched ${response.data.length} products from WooCommerce.`);
-      return response.data;
+      let allProducts = [];
+      let page = 1;
+      let hasMore = true;
+  
+      while (hasMore) {
+        const response = await limiter.schedule(() => wooCommerce.get('/products', {
+          params: {
+            per_page: 100, // Fetch 100 products per page
+            page: page,
+          },
+        }));
+        allProducts = allProducts.concat(response.data);
+        if (response.data.length < 100) {
+          hasMore = false; // No more products to fetch
+        } else {
+          page++;
+        }
+      }
+  
+      logger.debug(`Fetched ${allProducts.length} products from WooCommerce.`);
+      return allProducts;
     } catch (err) {
       logger.error('Error fetching products from WooCommerce:', { error: err.message, stack: err.stack });
       throw err;
