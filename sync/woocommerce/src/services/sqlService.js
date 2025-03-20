@@ -4,6 +4,13 @@ const logger = require('../utils/logger');
 async function fetchProducts() {
   try {
     logger.debug('Fetching products from SQL database...');
+    
+    // Test connection before executing query
+    const connectionSuccessful = await db.testConnection();
+    if (!connectionSuccessful) {
+      throw new Error('Database connection failed');
+    }
+    
     const query = `
       SELECT
         d.device_name,
@@ -22,7 +29,7 @@ async function fetchProducts() {
     logger.debug(`Fetched ${products.length} products from SQL database.`);
     return products;
   } catch (err) {
-    logger.error('Error fetching products from SQL:', err);
+    logger.error('Error fetching products from SQL:', { error: err.message, stack: err.stack });
     throw err;
   }
 }

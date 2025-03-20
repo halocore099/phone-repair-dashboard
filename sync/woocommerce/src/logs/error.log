@@ -14,3 +14,9 @@
 2025-03-19T17:24:00.151Z [ERROR]: Error during sync process:
 2025-03-19T17:29:45.358Z [ERROR]: Error fetching products from SQL: connect ECONNREFUSED ::1:3306
 2025-03-19T17:29:45.358Z [ERROR]: Error during sync process:
+2025-03-20T10:31:52.269Z [ERROR]: Failed to connect to the database:
+2025-03-20T10:31:52.270Z [ERROR]: Could not establish database connection
+2025-03-20T10:34:52.309Z [ERROR]: Failed to connect to the database:
+2025-03-20T10:34:52.310Z [ERROR]: Could not establish database connection
+2025-03-20T10:37:34.662Z [ERROR]: Failed to connect to the database: connect ETIMEDOUT
+2025-03-20T10:37:34.663Z [ERROR]: Could not establish database connection

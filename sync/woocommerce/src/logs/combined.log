@@ -42,3 +42,27 @@
 2025-03-19T17:29:45.340Z [DEBUG]: Fetching products from SQL database...
 2025-03-19T17:29:45.358Z [ERROR]: Error fetching products from SQL: connect ECONNREFUSED ::1:3306
 2025-03-19T17:29:45.358Z [ERROR]: Error during sync process:
+2025-03-20T10:31:52.174Z [DEBUG]: Attempting to connect to database: undefined at undefined as undefined
+2025-03-20T10:31:52.238Z [DEBUG]: Logger is working!
+2025-03-20T10:31:52.239Z [INFO]: Server is starting...
+2025-03-20T10:31:52.260Z [INFO]: Server is running on http://localhost:3001
+2025-03-20T10:31:52.269Z [ERROR]: Failed to connect to the database:
+2025-03-20T10:31:52.270Z [ERROR]: Could not establish database connection
+2025-03-20T10:34:52.213Z [DEBUG]: Attempting to connect to database: undefined at undefined as undefined
+2025-03-20T10:34:52.280Z [DEBUG]: Logger is working!
+2025-03-20T10:34:52.281Z [INFO]: Server is starting...
+2025-03-20T10:34:52.301Z [INFO]: Server is running on http://localhost:3001
+2025-03-20T10:34:52.309Z [ERROR]: Failed to connect to the database:
+2025-03-20T10:34:52.310Z [ERROR]: Could not establish database connection
+2025-03-20T10:37:24.571Z [DEBUG]: Attempting to connect to database: c1lennox at k98j70.meinserver.io as c0lennox
+2025-03-20T10:37:24.635Z [DEBUG]: Logger is working!
+2025-03-20T10:37:24.636Z [INFO]: Server is starting...
+2025-03-20T10:37:24.656Z [INFO]: Server is running on http://localhost:3001
+2025-03-20T10:37:34.662Z [ERROR]: Failed to connect to the database: connect ETIMEDOUT
+2025-03-20T10:37:34.663Z [ERROR]: Could not establish database connection
+2025-03-20T10:42:04.141Z [DEBUG]: Attempting to connect to database: c1lennox at k98j70.meinserver.io as c0lennox
+2025-03-20T10:42:04.205Z [DEBUG]: Logger is working!
+2025-03-20T10:42:04.206Z [INFO]: Server is starting...
+2025-03-20T10:42:04.225Z [INFO]: Server is running on http://localhost:3001
+2025-03-20T10:42:04.288Z [INFO]: Database connection established successfully
+2025-03-20T10:42:04.289Z [INFO]: Database connection verified successfully
