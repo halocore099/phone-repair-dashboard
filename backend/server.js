@@ -185,7 +185,8 @@ app.get('/devices/:device_id/repairs', authenticate, (req, res) => {
     SELECT
       dr.repair_type_id,
       rt.repair_type,
-      dr.price
+      dr.price,
+      dr.sku
     FROM
       device_repairs dr
     JOIN
@@ -229,20 +230,56 @@ app.get('/repairtypes', authenticate, (req, res) => {
 });
 
 
-app.post('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
+// POST endpoint for creating new repairs
+app.post('/devices/:device_id/repairs', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
-  const { repair_type_id, price } = req.body;
+  const { repair_type_id, price, sku } = req.body;
 
-  const query = 'INSERT INTO device_repairs (device_id, repair_type_id, price) VALUES (?, ?, ?)';
-  db.query(query, [device_id, repair_type_id, price], (err, result) => {
+  const query = `
+    INSERT INTO device_repairs (device_id, repair_type_id, price, sku)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(query, [device_id, repair_type_id, price, sku], (err, result) => {
     if (err) {
-      console.error('Error adding repair to device:', err);
-      return res.status(500).json({ error: 'Failed to add repair to device' });
+      console.error('Error adding repair:', err);
+      return res.status(500).json({ error: 'Failed to add repair' });
     }
-    res.status(201).json({ message: 'Repair added to device successfully' });
+    res.status(201).json({ message: 'Repair added successfully' });
   });
 });
 
+// PUT endpoint for updating existing repairs
+app.put('/devices/:device_id/repairs', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
+  const device_id = parseInt(req.params.device_id, 10);
+  const { repairs } = req.body;
+
+  Promise.all(
+    repairs.map(repair => 
+      new Promise((resolve, reject) => {
+        const query = ` 
+          INSERT INTO device_repairs (device_id, repair_type_id, price, sku) 
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE price = VALUES(price), sku = VALUES(sku)
+        `;
+        db.query(query, [device_id, repair.repair_type_id, repair.price, repair.sku], (err, result) => {
+          if (err) {
+            console.error('Error in repair operation:', err);
+            reject(err);
+          }
+          else resolve(result);
+        });
+      })
+    )
+  )
+  .then(() => {
+    res.json({ message: 'Repairs updated successfully' });
+  })
+  .catch(error => {
+    console.error('Error updating repairs:', error);
+    res.status(500).json({ error: 'Failed to update repairs' });
+  });
+});
 
 app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
@@ -280,36 +317,6 @@ const PORT = process.env.PORT || 3001;
 https.createServer(options, app).listen(PORT, () => {
   console.log(`Server running on https://localhost:${PORT}`);
 });  
-
-
-// Update the PUT endpoint to handle repair updates
-app.put('/devices/:device_id/repairs', authenticate, authorize('Read&Write'), (req, res) => {
-  const device_id = parseInt(req.params.device_id, 10);
-  const { repairs } = req.body;
-
-  Promise.all(
-    repairs.map(repair => 
-      new Promise((resolve, reject) => {
-        const query = ` 
-          INSERT INTO device_repairs (device_id, repair_type_id, price, sku) 
-          VALUES (?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE price = VALUES(price), sku = VALUES(sku)
-        `;
-        db.query(query, [device_id, repair.repair_type_id, repair.price, repair.sku], (err, result) => {
-          if (err) reject(err);
-          else resolve(result);
-        });
-      })
-    )
-  )
-  .then(() => {
-    res.json({ message: 'Repairs updated successfully' });
-  })
-  .catch(error => {
-    console.error('Error updating repairs:', error);
-    res.status(500).json({ error: 'Failed to update repairs' });
-  });
-});
 
 
 app.get('/users', authenticate, authorize('Sudo'), (req, res) => {

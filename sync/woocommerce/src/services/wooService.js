@@ -18,34 +18,45 @@ const wooCommerce = axios.create({
 });
 
 async function fetchWooCommerceProducts() {
-    try {
-      logger.debug('Fetching products from WooCommerce...');
-      let allProducts = [];
-      let page = 1;
-      let hasMore = true;
-  
-      while (hasMore) {
-        const response = await limiter.schedule(() => wooCommerce.get('/products', {
-          params: {
-            per_page: 100, // Fetch 100 products per page
-            page: page,
-          },
-        }));
-        allProducts = allProducts.concat(response.data);
-        if (response.data.length < 100) {
-          hasMore = false; // No more products to fetch
-        } else {
-          page++;
-        }
+  try {
+    logger.debug('Fetching products from WooCommerce...');
+    let allProducts = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await limiter.schedule(() => wooCommerce.get('/products', {
+        params: {
+          per_page: 100, // Fetch 100 products per page
+          page: page,
+        },
+      }));
+      allProducts = allProducts.concat(response.data);
+
+      // Log each product
+      response.data.forEach((product, index) => {
+        logger.debug(`Received WooCommerce Product ${(page - 1) * 100 + index + 1}:`, {
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          price: product.price,
+        });
+      });
+
+      if (response.data.length < 100) {
+        hasMore = false; // No more products to fetch
+      } else {
+        page++;
       }
-  
-      logger.debug(`Fetched ${allProducts.length} products from WooCommerce.`);
-      return allProducts;
-    } catch (err) {
-      logger.error('Error fetching products from WooCommerce:', { error: err.message, stack: err.stack });
-      throw err;
     }
+
+    logger.debug(`Fetched ${allProducts.length} products from WooCommerce.`);
+    return allProducts;
+  } catch (err) {
+    logger.error('Error fetching products from WooCommerce:', { error: err.message, stack: err.stack });
+    throw err;
   }
+}
   
 
 async function createWooCommerceProduct(product) {

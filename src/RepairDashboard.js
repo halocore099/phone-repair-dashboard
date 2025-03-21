@@ -257,7 +257,7 @@ const RepairDashboard = () => {
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{repair.repair_type}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       €{!isNaN(repair.price) ? parseFloat(repair.price).toFixed(2) : '0.00'}
-                    </td>w
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -268,8 +268,8 @@ const RepairDashboard = () => {
     );
   };
 
-  // Edit Modal Component
 
+  // Edit Modal Component
   const REPAIR_CATEGORIES = {
     'A': 'Analysen',
     'D': 'Display',
@@ -282,6 +282,7 @@ const RepairDashboard = () => {
     'S': 'Software',
     'Z': 'Zubehör',
   };
+  
   
   const EditModal = ({ device, onClose }) => {
     const [editedRepairs, setEditedRepairs] = useState([]);
@@ -313,14 +314,39 @@ const RepairDashboard = () => {
           const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setEditedRepairs(response.data);
+          
+          // Process the SKUs to extract the middle part (without prefix and suffix)
+          const processedRepairs = response.data.map(repair => {
+            let sku = repair.sku || "";
+            // If SKU has the format "O-{middle}{code}", extract the middle part
+            if (sku.startsWith("O-")) {
+              const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
+              const suffix = repairType?.code || "";
+              if (suffix && sku.endsWith(suffix)) {
+                // Remove prefix and suffix
+                sku = sku.substring(2, sku.length - suffix.length);
+              } else {
+                // Just remove prefix if suffix doesn't match
+                sku = sku.substring(2);
+              }
+            }
+            return {
+              ...repair,
+              sku: sku
+            };
+          });
+          
+          setEditedRepairs(processedRepairs);
         } catch (error) {
           console.error('Error fetching repairs:', error);
         }
       };
-  
-      fetchRepairs();
-    }, [device.device_id]);
+
+      // Only fetch repairs if we have repair types loaded
+      if (repairTypes.length > 0) {
+        fetchRepairs();
+      }
+    }, [device.device_id, repairTypes]);
   
     // Handle SKU changes
     const handleSKUChange = (repairTypeId, skuValue) => {
@@ -333,40 +359,56 @@ const RepairDashboard = () => {
       setEditedRepairs(updatedRepairs);
     };
   
-    // Handle adding a repair
     const handleAddRepair = () => {
       if (selectedRepairType) {
         const newRepair = {
           repair_type_id: selectedRepairType.repair_type_id,
           repair_type: selectedRepairType.repair_type,
-          price: selectedRepairType.price,
+          price: selectedRepairType.price || 0,
           sku: "", // Initialize SKU as empty
         };
+        console.log('Adding new repair:', newRepair);
         setEditedRepairs([...editedRepairs, newRepair]);
         setSelectedRepairType(null);
       }
     };
-  
+    
+    
+
     // Save changes
     const handleSave = async () => {
       try {
         const token = localStorage.getItem('token');
-        const formattedRepairs = editedRepairs.map(repair => ({
-          repair_type_id: repair.repair_type_id,
-          price: repair.price,
-          sku: repair.sku, // Include SKU in the payload
-        }));
-  
-        await axios.put(
+
+        // Prepare repairs with full SKU values
+        const repairsToSave = editedRepairs.map(repair => {
+          const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
+          const skuPrefix = "O-";
+          const skuSuffix = repairType?.code || "";
+          const fullSku = `${skuPrefix}${repair.sku || ""}${skuSuffix}`;
+          
+          return {
+            repair_type_id: repair.repair_type_id,
+            price: repair.price,
+            sku: fullSku
+          };
+        });
+
+        console.log('Saving repairs:', repairsToSave);
+
+        // Use the PUT endpoint to update all repairs at once
+        const response = await axios.put(
           `https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`,
-          { repairs: formattedRepairs },
-          { headers: { Authorization: `Bearer ${token}` }}
+          { repairs: repairsToSave },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-  
+
+        console.log('Save response:', response);
         await loadDevices();
         onClose();
       } catch (error) {
         console.error('Error saving repairs:', error);
+        alert('Failed to save repairs. Please try again.');
       }
     };
   

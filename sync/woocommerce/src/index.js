@@ -3,18 +3,48 @@ const path = require('path');
 require('dotenv').config({ 
   path: path.resolve(__dirname, './.env') 
 });
-
 const express = require('express');
 const cron = require('node-cron');
 const { syncProducts } = require('./services/syncService');
 const logger = require('./utils/logger');
 const db = require('./utils/db');
-
 const app = express();
+
+
+async function testDatabaseQuery() {
+  try {
+    const query = `
+      SELECT
+        d.device_name,
+        d.brand,
+        rt.repair_type,
+        dr.price,
+        dr.sku
+      FROM
+        device_repairs dr
+      JOIN
+        devices d ON dr.device_id = d.device_id
+      JOIN
+        repair_types rt ON dr.repair_type_id = rt.repair_type_id;
+    `;
+    const [rows] = await db.query(query);
+    logger.debug('Database query successful:', rows);
+    if (rows.length === 0) {
+      logger.warn('No products found in the SQL database.');
+    } else {
+      logger.debug('Query result:', rows);
+    }
+  } catch (err) {
+    logger.error('Database query failed:', { error: err.message, stack: err.stack });
+  }
+}
+
+testDatabaseQuery();
 
 // Test logger
 logger.debug('Logger is working!');
 logger.info('Server is starting...');
+
 
 // Test database connection on startup
 (async () => {
@@ -33,6 +63,7 @@ app.get('/', (req, res) => {
   res.send('WooCommerce Sync Server is running!');
 });
 
+
 app.get('/debug-sync', async (req, res) => {
   try {
     logger.info('Manual sync process triggered...');
@@ -44,9 +75,10 @@ app.get('/debug-sync', async (req, res) => {
   }
 });
 
+
 // Add a route to test database connection
 app.get('/test-db', async (req, res) => {
-  try {
+  try {3
     const connected = await db.testConnection();
     if (connected) {
       res.send('Database connection successful!');
@@ -58,6 +90,7 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
+
 cron.schedule('0 * * * *', async () => {
   logger.info('Starting scheduled sync process...');
   try {
@@ -68,7 +101,11 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);
 });
+
+
+testDatabaseQuery();

@@ -36,11 +36,18 @@ async function syncProducts() {
     logger.info('Starting sync process...');
 
     // Fetch products from SQL and WooCommerce
+    logger.debug('Fetching products from SQL database...');
     const sqlProducts = await fetchProducts();
+    logger.debug(`Fetched ${sqlProducts.length} products from SQL database.`);
+
+    logger.debug('Fetching products from WooCommerce...');
     const wooProducts = await fetchWooCommerceProducts();
+    logger.debug(`Fetched ${wooProducts.length} products from WooCommerce.`);
 
     // Compare products
+    logger.debug('Comparing SQL and WooCommerce products...');
     const { newProducts, updatedProducts } = compareProducts(sqlProducts, wooProducts);
+    logger.debug(`Found ${newProducts.length} new products and ${updatedProducts.length} updated products.`);
 
     // Create new products in WooCommerce
     logger.info(`Creating ${newProducts.length} new products...`);
@@ -54,7 +61,12 @@ async function syncProducts() {
           stock_quantity: 10, // Default stock quantity
         };
         const createdProduct = await createWooCommerceProduct(newProduct);
-        logger.info(`Created product: ${createdProduct.name} (ID: ${createdProduct.id})`);
+        logger.info(`Created Product ${createdCount + 1}:`, {
+          name: createdProduct.name,
+          id: createdProduct.id,
+          sku: createdProduct.sku,
+          price: createdProduct.price,
+        });
         createdCount++;
       } catch (err) {
         logger.error(`Error creating product: ${product.sku}`, { error: err.message, stack: err.stack });
@@ -71,7 +83,12 @@ async function syncProducts() {
           price: product.price.toString(),
         };
         const result = await updateWooCommerceProduct(product.wooId, updatedProduct);
-        logger.info(`Updated product: ${result.name} (ID: ${result.id})`);
+        logger.info(` Updated Product ${updatedCount + 1}:`, {
+          name: result.name,
+          id: result.id,
+          sku: result.sku,
+          price: result.price,
+        });
         updatedCount++;
       } catch (err) {
         logger.error(`Error updating product: ${product.sku}`, { error: err.message, stack: err.stack });
