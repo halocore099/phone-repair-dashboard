@@ -91,7 +91,7 @@ app.get('/test-db', async (req, res) => {
 });
 
 
-cron.schedule('0 * * * *', async () => {
+xcron.schedule('0 * * * *', async () => {
   logger.info('Starting scheduled sync process...');
   try {
     await syncProducts();
@@ -102,10 +102,10 @@ cron.schedule('0 * * * *', async () => {
 });
 
 
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);
 });
 
-
-testDatabaseQuery();
+testDatabaseQuery(); 

@@ -220,6 +220,8 @@ app.get('/repairtypes', authenticate, (req, res) => {
       repair_type
   `;
 
+
+
   db.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching repair types:', err);
