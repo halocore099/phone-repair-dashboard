@@ -1,0 +1,261 @@
+repair_type_id,repair_type
+521,Austausch Akku
+522,Austausch Akku Premium
+523,Austausch Akku Original
+524,Bundle Akku Standard
+525,Bundle Akku Premium
+526,Austausch Mainboard
+527,Austausch Grafikkarte
+528,Reseating
+529,Scharnierreparatur
+530,Austausch Scharnierleiste
+531,Austausch Hinge Cover
+532,Austausch diverse Kleinstbauteile
+533,Austausch Grafikkarte
+534,Austausch Original Netzteil
+535,Mainboard Lötarbeiten
+536,Grafikkarten Lötarbeiten
+537,Netzbuchsen Lötarbeiten
+538,Diverse Lötarbeiten
+539,Austausch Grafikchip
+540,Austausch diverser Mainboardkomponenten
+541,Austausch Northbridgechip
+542,Kurzschlussbeseitigung
+543,Austausch Original Mainboard
+544,Austausch Kamera
+545,Austausch Kamera hinten
+546,Austausch Original TrueDepth / Face ID Kamera
+547,Austausch Backcover
+548,Austausch Backcoverglas
+549,Austausch Rücksystem Original
+550,Austausch Lüfter
+551,Austausch Tastatur
+552,Austausch Topcase
+553,Austausch Bottomcase
+554,Austausch Displaydeckel
+555,Austausch Trackpad
+556,Austausch Trackpadflexkabel
+557,Farbumbau
+558,Austausch Kameraglas
+559,Austausch Mittelrahmen
+560,Austausch Scharnier (neu)
+561,Austausch Displaybezel (neu)
+562,Austausch Original Topcase inkl. Tastatur
+563,Austausch Original Topcase inkl. Tastatur und Akku
+564,Austausch Original Bottomcase
+565,Austausch Original Gehäuse
+566,Austausch Original Trackpad
+567,Trackpad Reparatur
+568,Austausch Ein/Aus-Schalter
+569,Austausch Home Button
+570,Austausch Lautstärkeflex
+571,Austausch Stummschalterflex
+572,Austausch WiFi-Schalter
+573,Austausch Home Button Flex
+574,Austausch WiFi-Antenne
+575,Austausch Mikrofon
+576,Austausch Ohrmuschel
+577,Austausch Lautsprecher
+578,Austausch Audiobuchse
+579,Austausch Ladebuchse
+580,Austausch SIM Connector
+581,Austausch Lichtsensor
+582,Austausch WiFi-Modul
+583,Austausch Vibrationsmotor
+584,Austausch HDMI-Anschluss
+585,Austausch DVI-Anschluss
+586,Austausch VGA-Anschluss
+587,Austausch Displayport-Anschluss
+588,Austausch USB-Anschluss
+589,Austausch Ethernetanschluss
+590,Austausch Netzbuchse
+591,Austausch Netzteil
+592,Komplettreinigung inkl. Wärmeleitpaste
+593,Flüssigkeitsreinigung
+594,Reinigung
+595,Reinigung Ladebuchse
+596,Reinigung (geringer Aufwand)
+597,Reinigung (großer Aufwand)
+598,Austausch C-MOS Batterie
+599,Austausch Backlight IC
+600,Austausch Ladeelektronik
+601,Austausch Touch IC
+602,Austausch Kamera IC
+603,Austausch BIOS-Chip inkl. Flashing
+604,Chip-Level-Recparatur
+605,Reparatur WLAN Modul
+606,Austausch Displaykonnektor
+607,Austausch Tastaturkonnektor
+608,Austausch Audio IC
+609,Austausch Powermanagement IC
+610,Austausch Tristar/U2 IC
+611,Austausch Baseband IC
+612,Austausch NAND
+613,NAND Aufrüstung
+614,Displaywechsel mit LCD/LED
+615,Austausch Display-LCD/LED-Einheit
+616,Austausch Premium Display
+617,Austausch Original Displayeinheit
+618,Glaswechsel
+619,LCD/LED Wechsel
+620,Austausch Displaykabel
+621,Austausch Original Touchbar
+622,Austausch DVD-Laufwerk
+623,Austausch Bluray-Laufwerkc
+624,Austausch Lasereinheit
+625,Austausch DVD-Brenner
+626,Austausch Bluray-Brenner
+627,"Einbau Festplatte 3,5'' 500GB"
+628,"Einbau Festplatte 3,5'' 1TB"
+629,"Einbau Festplatte 3,5'' 2TB (neu)"
+630,"Einbau Festplatte 3,5'' 4TB (neu)"
+631,"Einbau Festplatte 3,5'' 8TB (neu)"
+632,"Einbau Festplatte 2,5'' 500GB"
+633,"Einbau Festplatte 2,5'' 1TB"
+634,"Einbau Festplatte 2,5'' 2TB (neu)"
+635,Einbau SSD 120GB
+636,Einbau SSD 240GB
+637,Einbau SSD 500GB
+638,Einbau SSD 1TB
+639,Einbau SSD 2TB (neu)
+640,Einbau SSD 4TB (neu)
+641,Austausch Original SSD 256GB
+642,Austausch Original SSD 512GB
+643,Austausch Original SSD 1TB
+644,Austausch Original SSD 2TB
+645,Austausch Festplattenkabel
+646,Einbau iFlash mSATA SSD
+647,"Einbau HDD 1,8''"
+648,"Einbau iFlash SDHC 1,8''"
+649,Einbau mSata SSD 128GB
+650,Einbau mSata SSD 256GB
+651,Einbau mSata SSD 512GB
+652,Einbau mSata SSD 1TB
+653,Einbau M.2 SSD 64GB (neu)
+654,Einbau M.2 SSD 120GB (neu)
+655,Einbau M.2 SSD 250GB (neu)
+656,Einbau M.2 SSD 500GB (neu)
+657,Einbau M.2 SSD 1TB (neu)
+658,Einbau M.2 SSD 2TB (neu)
+659,"Festplatte in externes Gehäuse 2,5''"
+660,"Festplatte in externes Gehäuse 3,5''"
+661,Speichererweiterung auf 64GB (neu)
+662,Speichererweiterung auf 128GB (neu)
+663,Speichererweiterung auf 256GB (neu)
+664,Speichererweiterung auf 512GB (neu)
+665,"Einbaurahmen 2,5"" zu 3,5"""
+666,Einbau 1GB SO-DDR2
+667,Einbau 1GB DDR2
+668,Einbau 2GB SO-DDR2
+669,Einbau 2GB DDR2
+670,Einbau 4GB SO-DDR2
+671,Einbau 4GB DDR2
+672,Einbau 4GB SO-DDR3
+673,Einbau 4GB DDR3
+674,Einbau 8GB SO-DDR3
+675,Einbau 8GB DDR3
+676,Einbau 4GB SO-DDR4
+677,Einbau 4GB DDR4
+678,Einbau 8GB SO-DDR4
+679,Einbau 8GB DDR4
+680,Einbau 16GB SO-DDR4
+681,Einbau 16GB DDR4
+682,Einbau 32GB SO-DDR4
+683,Einbau 32GB DDR4
+684,Einbau 16GB SO-DDR3
+685,Einbau 16GB DDR3
+686,Austausch Original RAM 4GB
+687,Austausch Original RAM 8GB
+688,Austausch Original RAM 16GB
+689,Austausch Original RAM 32GB
+690,Austausch Original RAM 64GB
+691,Austausch Original RAM 128GB
+692,Austausch Original RAM 256GB
+693,PC Netzteil 450W
+694,PC Netzteil 600W
+695,PC Netzteil 700W
+696,Panzerglas inkl. Anbringung
+697,Folie anbringen
+698,"Externe 2,5'' HDD USB 3.0 500GB"
+699,"Externe 2,5'' HDD USB 3.0 1TB"
+700,"Externe 2,5'' HDD USB 3.0 2TB"
+701,Panzerglas Premium inkl. Anbringung
+702,Panzerglas Standard inkl. Anbringung
+703,Panzerglas Privacy inkl. Anbringung
+704,Bundle Panzerglas Premium
+705,Bundle Panzerglas Standard
+706,Hydrogel Folie inkl. Anbringung (vorne)
+707,Hydrogel Folie inkl. Anbringung (vorne)
+708,Datensicherung
+709,Datenübertragung Standard
+710,Datenübertragung Premium
+711,sichere Datenlöschung (Zertifikat)
+712,Simlock Entfernung
+713,Datenmigration
+714,Systemaktualisierung
+715,Neuinstallation OSX
+716,Neuinstallation iOS
+717,Neuinstallation Windows
+718,Neuinstallation Android
+719,Neuinstallation diverse Systeme
+720,Virenentfernung
+721,Datenrettung 50GB
+722,Datenrettung 250GB
+723,Datenrettung bei logischem Schaden
+724,Datenrettung 2TB
+725,Datenrettung Mobile
+726,Board Swap Datenrettung
+727,Systemoptimierung
+728,erweiterte Systemoptimierung
+729,Sicherheitscheck
+730,Einrichtung Datensicherung
+731,Geräteersteinrichtung
+732,Installation Software (Individuell)
+733,Softwareupdate
+734,Datenrettung komplex (externes Partnerlabor)
+735,Installation Parallels/BootCamp inkl. Windows
+736,Systemreparatur
+737,GDATA Antivirus 1 Jahreslizenz
+738,Windows 7 Home Premium Lizenz (neu)
+739,Windows 7 Professional Lizenz (neu)
+740,Windows 10 Pro Lizenz
+741,Bullguard Internet Security 1 Jahr / 3 PCs
+742,Bullguard Internet Security 3 Monate Testversion
+743,ESET Internet Security 1 Jahr / 1 PC
+744,ESET Internet Security HaspaJoker 1 Jahr / 1 PC
+745,Office 2016 Home and Business - Original 1 PC
+746,Office 2016 Home and Business Mac - Original 1 PC
+747,Office 2016 Home and Student - Original 1 PC
+748,Office 2016 Home and Student Mac - Original 1 PC
+749,Systemfreischaltung (iCloud iOS und Android)
+750,Wasserschadenanalyse
+751,Fallschadenanalyse
+752,kostenpflichtige Analyse
+753,Kostenvoranschlag für Versicherungen
+754,Gutachten
+755,Online Analyse
+756,kostenlose Analyse
+757,Express Pauschale
+758,Gerätetest (Zertifikat)
+759,kostenpflichtige Analyse verringert
+760,geringer Aufwand (15 min)
+761,mittlerer Aufwand (30 min)
+762,großer Aufwand (60 min)
+763,sehr großer Aufwand (90 min)
+764,extremer Aufwand (120 min)
+765,Zusammenbau
+766,Garantieabwicklung
+767,Einbau weiterer Komponente
+768,Austauschgerät
+769,Gravur Standard
+770,Gravur Premium
+771,Gravur Individual
+772,Geräteverkauf (Reklamation)
+773,Geräteankauf (Bewertung)
+774,Bundle Servicepaket Standard
+775,Bundle Servicepaket Premium
+776,Bundle Servicepaket Standard
+777,Selbstbehalt HaspaJoker
+778,Selbstbehalt Wertgarantie
+779,Selbstbehalt S-Mobilgeräte
+780,Herstellerabwicklung

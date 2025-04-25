@@ -15,21 +15,30 @@ const options = {
   cert: fs.readFileSync('/var/www/clients/client1/web48/home/c334458admin/backend/cert.pem')
 };
 
-const db = mysql.createConnection({
+// Replace your current db connection with this:
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  connectTimeout: 10000, // 10 seconds
+  acquireTimeout: 10000, // 10 seconds
+  timeout: 60000, // 60 seconds
 });
 
-// Connect to the database
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed:', err);
-    return;
+// Add error handling
+db.on('error', (err) => {
+  console.error('Database error:', err);
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    // Handle connection loss
+  } else {
+    throw err;
   }
-  console.log('Connected to the database');
 });
+
 
 
 // User Registration endpoint
@@ -77,13 +86,14 @@ app.post('/login', (req, res) => {
 
 // Get all devices (protected route)
 app.get('/devices', authenticate, (req, res) => {
-  const { search, limit = 20, offset = 0, brand } = req.query;
+  const { search, brand } = req.query;
 
   let query = `
     SELECT 
       devices.device_id, 
       devices.device_name, 
-      devices.brand, 
+      devices.brand,
+      devices.device_type, 
       COUNT(device_repairs.repair_type_id) as repair_count
     FROM 
       devices
@@ -91,46 +101,47 @@ app.get('/devices', authenticate, (req, res) => {
       device_repairs ON devices.device_id = device_repairs.device_id
   `;
 
+  const queryParams = []; // Declare this first
+  
+  // Build WHERE clauses conditionally
   if (search) {
-    query += ` WHERE devices.device_name LIKE ? OR devices.brand LIKE ?`;
+    query += ` WHERE (devices.device_name LIKE ? OR devices.brand LIKE ?)`;
+    queryParams.push(`%${search}%`, `%${search}%`);
   }
+  
   if (brand) {
     query += search ? ` AND` : ` WHERE`;
     query += ` devices.brand = ?`;
+    queryParams.push(brand);
   }
 
   query += ` GROUP BY 
     devices.device_id, 
     devices.device_name, 
     devices.brand
-    LIMIT ? OFFSET ?
   `;
 
-  const queryParams = [];
-  if (search) {
-    queryParams.push(`%${search}%`, `%${search}%`);
-  }
-  if (brand) {
-    queryParams.push(brand);
-  }
-  queryParams.push(parseInt(limit), parseInt(offset));
 
   db.query(query, queryParams, (err, results) => {
     if (err) {
-      console.error('Error fetching devices:', err);
-      return res.status(500).json({ error: 'Failed to fetch devices' });
+      console.error('Error executing query:', err);
+      console.error('Full query:', query);
+      console.error('Query parameters:', queryParams);
+      return res.status(500).json({ 
+        error: 'Database query failed',
+        details: err.message 
+      });
     }
     res.json(results);
   });
 });
 
 
-// Add a new device (protected route)
 app.post('/devices', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
-  const { device_name, brand } = req.body;
-  const query = 'INSERT INTO devices (device_name, brand) VALUES (?, ?)';
+  const { device_name, brand, device_type } = req.body;
+  const query = 'INSERT INTO devices (device_name, brand, device_type) VALUES (?, ?, ?)';
 
-  db.query(query, [device_name, brand], (err, result) => {
+  db.query(query, [device_name, brand, device_type], (err, result) => {
     if (err) {
       console.error('Error adding device:', err); 
       return res.status(500).json({ error: 'Failed to add device' });
@@ -141,7 +152,6 @@ app.post('/devices', authenticate, authorize(['Read&Write', 'Sudo']), (req, res)
     });
   });
 });
-
 
 // Delete a device (protected route, requires Sudo role)
 app.delete('/devices/:device_id', authenticate, authorize('Sudo'), (req, res) => {
@@ -256,40 +266,42 @@ app.put('/devices/:device_id/repairs', authenticate, authorize(['Read&Write', 'S
   const device_id = parseInt(req.params.device_id, 10);
   const { repairs } = req.body;
 
-  Promise.all(
-    repairs.map(repair => 
-      new Promise((resolve, reject) => {
-        const query = ` 
-          INSERT INTO device_repairs (device_id, repair_type_id, price, sku) 
-          VALUES (?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE price = VALUES(price), sku = VALUES(sku)
-        `;
-        db.query(query, [device_id, repair.repair_type_id, repair.price, repair.sku], (err, result) => {
-          if (err) {
-            console.error('Error in repair operation:', err);
-            reject(err);
-          }
-          else resolve(result);
-        });
-      })
-    )
-  )
-  .then(() => {
-    res.json({ message: 'Repairs updated successfully' });
-  })
-  .catch(error => {
-    console.error('Error updating repairs:', error);
-    res.status(500).json({ error: 'Failed to update repairs' });
+  const query = `
+    INSERT INTO device_repairs 
+      (device_id, repair_type_id, price, sku)
+    VALUES ?
+    ON DUPLICATE KEY UPDATE
+      price = VALUES(price),
+      sku = VALUES(sku)
+  `;
+
+  const values = repairs.map(repair => [
+    device_id,
+    repair.repair_type_id,
+    repair.price,
+    repair.sku
+  ]);
+
+  db.query(query, [values], (err, result) => {
+    if (err) {
+      console.error('Error updating repairs:', err);
+      return res.status(500).json({ error: 'Failed to update repairs' });
+    }
+    res.json({ 
+      message: 'Repairs updated successfully',
+      affectedRows: result.affectedRows
+    });
   });
 });
 
-app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
+// Update this endpoint in server.js
+app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
   const repair_type_id = parseInt(req.params.repair_type_id, 10);
-  const { price } = req.body;
+  const { price, sku } = req.body;
 
-  const query = 'UPDATE device_repairs SET price = ? WHERE device_id = ? AND repair_type_id = ?';
-  db.query(query, [price, device_id, repair_type_id], (err, result) => {
+  const query = 'UPDATE device_repairs SET price = ?, sku = ? WHERE device_id = ? AND repair_type_id = ?';
+  db.query(query, [price, sku, device_id, repair_type_id], (err, result) => {
     if (err) {
       console.error('Error updating repair for device:', err);
       return res.status(500).json({ error: 'Failed to update repair for device' });
@@ -299,7 +311,7 @@ app.put('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('
 });
 
 
-app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Read&Write'), (req, res) => {
+app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authorize('Sudo'), (req, res) => {
   const device_id = parseInt(req.params.device_id, 10);
   const repair_type_id = parseInt(req.params.repair_type_id, 10);
 
@@ -342,5 +354,106 @@ app.put('/users/:userId/role', authenticate, authorize('Sudo'), (req, res) => {
       return res.status(500).json({ error: 'Failed to update user role' });
     }
     res.json({ message: 'User role updated successfully' });
+  });
+});
+
+// Add a new repair type (protected route)
+app.post('/repairtypes', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
+  const { repair_type, code, category, category_name } = req.body;
+  
+  // Validate required fields
+  if (!repair_type || !code || !category) {
+    return res.status(400).json({ error: 'Missing required fields. repair_type, code, and category are required.' });
+  }
+  
+  // Validate code length (3 characters)
+  if (code.length !== 3) {
+    return res.status(400).json({ error: 'Code must be exactly 3 characters.' });
+  }
+  
+  // Validate category (should be a single character)
+  if (category.length !== 1) {
+    return res.status(400).json({ error: 'Category must be a single character.' });
+  }
+  
+  const query = 'INSERT INTO repairtypes (repair_type, code, category, category_name) VALUES (?, ?, ?, ?)';
+  
+  db.query(query, [repair_type, code, category, category_name], (err, result) => {
+    if (err) {
+      console.error('Error adding repair type:', err);
+      return res.status(500).json({ 
+        error: 'Failed to add repair type',
+        details: err.message
+      });
+    }
+    
+    res.status(201).json({
+      message: 'Repair type added successfully',
+      repair_type_id: result.insertId,
+      repair_type,
+      code,
+      category,
+      category_name
+    });
+  });
+});
+
+// Add multiple repair types (protected route)
+app.post('/repairtypes/batch', authenticate, authorize(['Read&Write', 'Sudo']), (req, res) => {
+  const { repair } = req.body;  // Using "repair" as the key as requested
+  
+  if (!Array.isArray(repair) || repair.length === 0) {
+    return res.status(400).json({ error: 'Request must include an array of repair types under the "repair" key' });
+  }
+  
+  // Validate all entries
+  for (const item of repair) {
+    const { repair_type, code, category } = item;
+    
+    if (!repair_type || !code || !category) {
+      return res.status(400).json({ 
+        error: 'Missing required fields. Each entry must have repair_type, code, and category.',
+        invalidEntry: item
+      });
+    }
+    
+    if (code.length !== 3) {
+      return res.status(400).json({ 
+        error: 'Code must be exactly 3 characters.',
+        invalidEntry: item
+      });
+    }
+    
+    if (category.length !== 1) {
+      return res.status(400).json({ 
+        error: 'Category must be a single character.',
+        invalidEntry: item
+      });
+    }
+  }
+  
+  // Prepare values for bulk insert
+  const values = repair.map(item => [
+    item.repair_type,
+    item.code,
+    item.category,
+    item.category_name || null
+  ]);
+  
+  const query = 'INSERT INTO repairtypes (repair_type, code, category, category_name) VALUES ?';
+  
+  db.query(query, [values], (err, result) => {
+    if (err) {
+      console.error('Error adding repair types:', err);
+      return res.status(500).json({ 
+        error: 'Failed to add repair types',
+        details: err.message
+      });
+    }
+    
+    res.status(201).json({
+      message: `${result.affectedRows} repair types added successfully`,
+      firstInsertId: result.insertId
+    });
   });
 });

@@ -13,7 +13,7 @@ const RepairDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [selectedDevices, setSelectedDevices] = useState([]);
-  const [newDevice, setNewDevice] = useState({ device_name: "", brand: "" });
+  const [newDevice, setNewDevice] = useState({ device_name: "", brand: "", device_type: ""});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [username, setUsername] = useState('');
@@ -23,6 +23,9 @@ const RepairDashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [totalRepairs, setTotalRepairs] = useState(0);
+  const [deviceTypeFilter, setDeviceTypeFilter] = useState('');
 
   // Theme Toggle Component
   const ThemeToggle = () => (
@@ -34,6 +37,7 @@ const RepairDashboard = () => {
       {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
     </Button>
   );
+
 
   // Login Handler
   const handleLogin = async () => {
@@ -51,6 +55,26 @@ const RepairDashboard = () => {
       alert('Invalid username or password.');
     }
   };
+  const handleLoginKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  const triggerServerEventWithIframe = () => {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = 'https://k98j70.meinserver.io:3002/debug-sync';
+    document.body.appendChild(iframe);
+
+    // Remove the iframe after it has loaded
+    iframe.onload = () => {
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+    };
+  };
+
 
   // Logout Handler
   const handleLogout = () => {
@@ -71,6 +95,11 @@ const RepairDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDevices(response.data);
+
+      // Calculate total repairs
+      const totalRepairCount = response.data.reduce((sum, device) =>
+        sum + (device.repair_count || 0), 0);
+      setTotalRepairs(totalRepairCount);
     } catch (error) {
       console.error('Error loading devices:', error);
       if (error.response?.status === 401) {
@@ -166,9 +195,9 @@ const RepairDashboard = () => {
   const handleAddDevice = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://k98j70.meinserver.io:3001/devices', 
+      const response = await axios.post('https://k98j70.meinserver.io:3001/devices',
         newDevice,
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setDevices([...devices, { device_id: response.data.device_id, ...newDevice, repair_count: 0 }]);
       setNewDevice({ device_name: "", brand: "" });
@@ -177,7 +206,7 @@ const RepairDashboard = () => {
       console.error('Error adding device:', error);
     }
   };
- 
+
   // Handle Mass Delete
   const handleMassDelete = async () => {
     if (selectedDevices.length === 0) return;
@@ -235,17 +264,18 @@ const RepairDashboard = () => {
     }, [device.device_id]);
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">
               {device.device_name} - {device.brand} (ID: {device.device_id})
             </h2>
-            <Button variant="ghost" onClick={onClose}>X</Button>
+            <Button variant="ghost" onClick={onClose}>×</Button>
           </div>
-          <div className="overflow-x-auto">
+
+          <div className="flex-1 overflow-y-auto mb-4 pr-2">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Repair Type</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Price</th>
@@ -263,11 +293,14 @@ const RepairDashboard = () => {
               </tbody>
             </table>
           </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={onClose}>Close</Button>
+          </div>
         </div>
       </div>
     );
   };
-
 
   // Edit Modal Component
   const REPAIR_CATEGORIES = {
@@ -282,15 +315,16 @@ const RepairDashboard = () => {
     'S': 'Software',
     'Z': 'Zubehör',
   };
-  
-  
+
+
   const EditModal = ({ device, onClose }) => {
     const [editedRepairs, setEditedRepairs] = useState([]);
     const [selectedRepairType, setSelectedRepairType] = useState(null);
     const [repairTypes, setRepairTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-  
-    // Fetch repair types and repairs when the modal opens
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Fetch repair types
     useEffect(() => {
       const fetchRepairTypes = async () => {
         try {
@@ -303,10 +337,10 @@ const RepairDashboard = () => {
           console.error('Error fetching repair types:', error);
         }
       };
-  
       fetchRepairTypes();
     }, []);
-  
+
+    // Fetch repairs
     useEffect(() => {
       const fetchRepairs = async () => {
         try {
@@ -314,19 +348,15 @@ const RepairDashboard = () => {
           const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
-          // Process the SKUs to extract the middle part (without prefix and suffix)
+
           const processedRepairs = response.data.map(repair => {
             let sku = repair.sku || "";
-            // If SKU has the format "O-{middle}{code}", extract the middle part
             if (sku.startsWith("O-")) {
               const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
               const suffix = repairType?.code || "";
               if (suffix && sku.endsWith(suffix)) {
-                // Remove prefix and suffix
                 sku = sku.substring(2, sku.length - suffix.length);
               } else {
-                // Just remove prefix if suffix doesn't match
                 sku = sku.substring(2);
               }
             }
@@ -335,58 +365,85 @@ const RepairDashboard = () => {
               sku: sku
             };
           });
-          
+
           setEditedRepairs(processedRepairs);
         } catch (error) {
           console.error('Error fetching repairs:', error);
         }
       };
 
-      // Only fetch repairs if we have repair types loaded
       if (repairTypes.length > 0) {
         fetchRepairs();
       }
     }, [device.device_id, repairTypes]);
-  
-    // Handle SKU changes
+
     const handleSKUChange = (repairTypeId, skuValue) => {
-      const updatedRepairs = editedRepairs.map(repair => {
-        if (repair.repair_type_id === repairTypeId) {
-          return { ...repair, sku: skuValue };
-        }
-        return repair;
-      });
-      setEditedRepairs(updatedRepairs);
+      setEditedRepairs(prev =>
+        prev.map(repair =>
+          repair.repair_type_id === repairTypeId
+            ? { ...repair, sku: skuValue }
+            : repair
+        )
+      );
     };
-  
+
+    const handlePriceChange = (repairTypeId, newPrice) => {
+      setEditedRepairs(prev =>
+        prev.map(repair =>
+          repair.repair_type_id === repairTypeId
+            ? { ...repair, price: parseFloat(newPrice) || 0 }
+            : repair
+        )
+      );
+    };
+
     const handleAddRepair = () => {
-      if (selectedRepairType) {
+      if (selectedRepairType && !editedRepairs.some(r => r.repair_type_id === selectedRepairType.repair_type_id)) {
         const newRepair = {
           repair_type_id: selectedRepairType.repair_type_id,
           repair_type: selectedRepairType.repair_type,
           price: selectedRepairType.price || 0,
-          sku: "", // Initialize SKU as empty
+          sku: "",
         };
-        console.log('Adding new repair:', newRepair);
         setEditedRepairs([...editedRepairs, newRepair]);
         setSelectedRepairType(null);
+        setSearchTerm('');
+      } else if (selectedRepairType) {
+        alert('This repair type already exists for this device');
+      } else {
+        setSearchTerm(' '); // Show dropdown if nothing selected
       }
     };
-    
-    
 
-    // Save changes
-    const handleSave = async () => {
+    const handleRemoveRepair = async (deviceId, repairTypeId) => {
       try {
         const token = localStorage.getItem('token');
+        await axios.delete(
+          `https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairTypeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        setEditedRepairs(prev => prev.filter(repair => repair.repair_type_id !== repairTypeId));
+      } catch (error) {
+        console.error('Error removing repair:', error);
+        alert(`Error: ${error.response?.data?.error || error.message}`);
+      }
+    };
 
-        // Prepare repairs with full SKU values
+    const handleSave = async () => {
+      setIsSaving(true);
+      try {
+        const token = localStorage.getItem('token');
         const repairsToSave = editedRepairs.map(repair => {
           const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
           const skuPrefix = "O-";
           const skuSuffix = repairType?.code || "";
           const fullSku = `${skuPrefix}${repair.sku || ""}${skuSuffix}`;
-          
+
           return {
             repair_type_id: repair.repair_type_id,
             price: repair.price,
@@ -394,43 +451,22 @@ const RepairDashboard = () => {
           };
         });
 
-        console.log('Saving repairs:', repairsToSave);
-
-        // Use the PUT endpoint to update all repairs at once
-        const response = await axios.put(
+        await axios.put(
           `https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`,
           { repairs: repairsToSave },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log('Save response:', response);
-        await loadDevices();
+        alert('Repairs updated successfully');
         onClose();
       } catch (error) {
         console.error('Error saving repairs:', error);
         alert('Failed to save repairs. Please try again.');
+      } finally {
+        setIsSaving(false);
       }
     };
-  
-    // Handle removing a repair
-    const handleRemoveRepair = async (deviceId, repairTypeId) => {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(
-          `https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairTypeId}`,
-          { headers: { Authorization: `Bearer ${token}` }}
-        );
-        // Refresh the repairs list after deletion
-        const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setEditedRepairs(response.data);
-      } catch (error) {
-        console.error('Error removing repair:', error);
-      }
-    };
-  
-    // Group repair types by category
+
     const groupedRepairTypes = Object.entries(
       repairTypes.reduce((acc, repair) => {
         const category = repair.category || 'O';
@@ -444,40 +480,34 @@ const RepairDashboard = () => {
         return acc;
       }, {})
     );
-  
-    // Filter repair types based on search term
-    const filteredRepairTypes = repairTypes.filter(repair =>
-      repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  
+
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">
               {device.device_name} - {device.brand} (ID: {device.device_id})
             </h2>
             <Button variant="ghost" onClick={onClose}>×</Button>
           </div>
-          <div className="space-y-4">
+
+          {/* Scrollable repairs list */}
+          <div className="flex-1 overflow-y-auto mb-4 pr-2">
             {editedRepairs.map((repair) => {
               const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
               const skuPrefix = "O-";
               const skuSuffix = repairType?.code || "";
-  
+
               return (
-                <div key={repair.repair_type_id}>
+                <div key={`${repair.repair_type_id}-${device.device_id}`} className="p-3 border rounded dark:border-gray-700 mb-2">
                   <div className="flex items-center gap-4">
                     <span className="min-w-[200px]">{repair.repair_type}</span>
                     <Input
                       type="number"
                       value={repair.price}
-                      onChange={(e) => {
-                        const newRepairs = [...editedRepairs];
-                        newRepairs.find(r => r.repair_type_id === repair.repair_type_id).price = parseFloat(e.target.value) || 0;
-                        setEditedRepairs(newRepairs);
-                      }}
+                      onChange={(e) => handlePriceChange(repair.repair_type_id, e.target.value)}
                       className="w-32"
+                      step="0.01"
                     />
                     <Button
                       variant="outline"
@@ -495,51 +525,56 @@ const RepairDashboard = () => {
                       onChange={(e) => handleSKUChange(repair.repair_type_id, e.target.value)}
                       className="w-48"
                     />
-                    <span>{skuPrefix}{repair.sku || ""}{skuSuffix}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {skuPrefix}{repair.sku || ""}{skuSuffix}
+                    </span>
                   </div>
                 </div>
               );
             })}
-            {/* Add repair type dropdown and other existing code */}
-            <div className="flex items-center gap-4">
-              <div className="relative w-full">
+          </div>
+
+          {/* Search and dropdown */}
+          <div className="relative mb-4">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
                 <Input
-                  type="text" 
-                  placeholder="Search or select repair type..."
+                  type="text"
+                  placeholder="Search repair types..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full mb-0"
+                  className="w-full"
                 />
                 <button
                   type="button"
-                  onClick={() => setSearchTerm(searchTerm ? '' : ' ')} // Space triggers dropdown
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => setSearchTerm(searchTerm ? '' : ' ')}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1"
                 >
-                  <ChevronDown size={20} />
+                  <ChevronDown size={20} className="text-gray-500" />
                 </button>
-                {searchTerm && (
-                  <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900 shadow-lg">
+                {(searchTerm || searchTerm === ' ') && (
+                  <div className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto border rounded-md bg-white dark:bg-gray-900 shadow-lg">
                     {groupedRepairTypes.map(([category, data]) => {
                       const filteredRepairs = data.repairs.filter(repair =>
                         repair.repair_type.toLowerCase().includes(searchTerm.toLowerCase())
                       );
                       if (filteredRepairs.length === 0) return null;
-  
+
                       return (
                         <div key={category} className="p-2">
                           <div className="font-medium text-gray-700 dark:text-gray-300">
-                            {category} -  {data.name}
+                            {category} - {data.name}
                           </div>
                           {filteredRepairs.map(repair => (
                             <div
                               key={repair.repair_type_id}
-                              className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" 
+                              className="pl-4 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                               onClick={() => {
                                 setSelectedRepairType(repair);
-                                setSearchTerm('');
+                                setSearchTerm(repair.repair_type);
                               }}
                             >
-                                {repair.repair_type} - €{repair.price}
+                              {repair.repair_type} - €{repair.price}
                             </div>
                           ))}
                         </div>
@@ -548,25 +583,34 @@ const RepairDashboard = () => {
                   </div>
                 )}
               </div>
-              <Button onClick={handleAddRepair}>Add</Button>
+              <Button
+                onClick={handleAddRepair}
+                className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+              >
+                <Plus size={20} />
+              </Button>
             </div>
           </div>
-          <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+
+          {/* Footer buttons */}
+          <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </div>
       </div>
     );
   };
- 
+
   const AdminModal = ({ onClose }) => {
     const [users, setUsers] = useState([]);
     const [changes, setChanges] = useState({});
     const [showAddUser, setShowAddUser] = useState(false);
     const [newUser, setNewUser] = useState({ username: '', password: '', role: 'Read' });
     const roles = ['Read', 'Read&Write', 'Sudo'];
-  
+
     useEffect(() => {
       const fetchUsers = async () => {
         const token = localStorage.getItem('token');
@@ -582,18 +626,18 @@ const RepairDashboard = () => {
       try {
         const token = localStorage.getItem('token');
         const registrationToken = process.env.REACT_APP_REGISTRATION_TOKEN;
-        
+
         await axios.post(
           'https://k98j70.meinserver.io:3001/register',
-          {  
-            username: newUser.username, 
-            password: newUser.password, 
+          {
+            username: newUser.username,
+            password: newUser.password,
             role: newUser.role,
-            registrationToken 
+            registrationToken
           },
-          { headers: { Authorization: `Bearer ${token}` }}
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        
+
         const response = await axios.get('https://k98j70.meinserver.io:3001/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -606,25 +650,25 @@ const RepairDashboard = () => {
         alert('Failed to create user. Please check your permissions and try again.');
       }
     };
-  
-  
+
+
     const handleRoleChange = (userId, newRole) => {
       setChanges({ ...changes, [userId]: newRole });
     };
-  
+
     const handleSaveChanges = async () => {
       const token = localStorage.getItem('token');
       for (const [userId, role] of Object.entries(changes)) {
         await axios.put(
           `https://k98j70.meinserver.io:3001/users/${userId}/role`,
           { role },
-          { headers: { Authorization: `Bearer ${token}` }}
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       }
       onClose();
     };
 
-    
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
@@ -632,46 +676,51 @@ const RepairDashboard = () => {
             <h2 className="text-xl font-bold">Admin Panel - User Management</h2>
             <Button variant="ghost" onClick={onClose}>×</Button>
           </div>
-          
-          <div className="mb-4">
-          <Button
-            onClick={() => setShowAddUser(!showAddUser)}
-            className="flex items-center gap-2"
-          >
-            <Plus size={16} />
-            Add New User
-          </Button>
-        </div>
 
-        {showAddUser && (
-          <div className="mb-4 p-4 bord   er rounded-lg dark:border-gray-700">
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                placeholder="Username"
-                value={newUser.username}
-                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-              />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-              />
-              <select
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                className="border p-2 rounded dark:bg-gray-700"
-              >
-                {roles.map(role => (
-                  <option key={role} value={role}>{role}</option>
-                ))} 
-              </select>
-            </div>
-            <div className="flex justify-end mt-4">
-              <Button onClick={handleAddUser}>Create User</Button>
-            </div>
+          <div className="mb-4">
+            <Button
+              onClick={() => setShowAddUser(!showAddUser)}
+              className="flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add New User
+            </Button>
           </div>
-        )}
+
+          {showAddUser && (
+            <div className="mb-4 p-4 bord   er rounded-lg dark:border-gray-700">
+              <div className="grid grid-cols-3 gap-4">
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onKeyPress={handleLoginKeyPress}
+                  className="w-full dark:bg-gray-700 dark:text-white"
+                />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleLoginKeyPress}
+                  className="w-full dark:bg-gray-700 dark:text-white"
+                />
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  className="border p-2 rounded dark:bg-gray-700"
+                >
+                  {roles.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button onClick={handleAddUser}>Create User</Button>
+              </div>
+            </div>
+          )}
 
           <div className="overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -713,11 +762,20 @@ const RepairDashboard = () => {
       </div>
     );
   };
-  // Filtered Devices
-  const filteredDevices = devices.filter(device =>
-    device.device_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (brandFilter ? device.brand === brandFilter : true)
-  );
+  
+  const filteredDevices = devices.filter(device => {
+    const deviceName = device.device_name ? device.device_name.toLowerCase() : '';
+    const searchTermLower = searchTerm ? searchTerm.toLowerCase() : '';
+    const deviceBrand = device.brand || '';
+    const deviceType = device.device_type || '';
+    
+    return (
+      deviceName.includes(searchTermLower) &&
+      (brandFilter ? deviceBrand === brandFilter : true) &&
+      (deviceTypeFilter ? deviceType === deviceTypeFilter : true)
+    );
+  });
+  
 
   // Load Devices on Component Mount
   useEffect(() => {
@@ -726,7 +784,6 @@ const RepairDashboard = () => {
     }
   }, [isLoggedIn]);
 
-  // Login Page
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -741,6 +798,7 @@ const RepairDashboard = () => {
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyPress={handleLoginKeyPress}
                 className="w-full dark:bg-gray-700 dark:text-white"
               />
               <Input
@@ -748,6 +806,7 @@ const RepairDashboard = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={handleLoginKeyPress}
                 className="w-full dark:bg-gray-700 dark:text-white"
               />
               <Button onClick={handleLogin} className="w-full">
@@ -769,6 +828,15 @@ const RepairDashboard = () => {
             <CardTitle>Repair Management Dashboard</CardTitle>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              {userRole === 'Sudo' && (
+                <Button
+                  onClick={triggerServerEventWithIframe}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  Push Changes
+                </Button>
+              )}
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -782,7 +850,7 @@ const RepairDashboard = () => {
                   variant="outline"
                   className="flex items-center gap-2"
                 >
-                Admin Panel
+                  Admin Panel
                 </Button>
               )}
               {(userRole === 'Read&Write' || userRole === 'Sudo') && (
@@ -793,6 +861,7 @@ const RepairDashboard = () => {
                   <Plus size={16} />
                   Add Device
                 </Button>
+
               )}
             </div>
           </div>
@@ -813,8 +882,26 @@ const RepairDashboard = () => {
                 brand && <option key={brand} value={brand} className="dark:bg-gray-700">{brand}</option>
               ))}
             </select>
+            <select
+              value={deviceTypeFilter}
+              onChange={(e) => setDeviceTypeFilter(e.target.value)}
+              className="border p-2 rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              <option value="">All Types</option>
+              {[...new Set(devices
+                .map(device => device.device_type)
+                .filter(type => type && type.trim() !== '')
+              )].map(type => (
+                <option key={type} value={type} className="dark:bg-gray-700">
+                  {type}
+                </option>
+              ))}
+            </select>
             <span className="text-sm text-gray-600 dark:text-gray-300 self-center">
               Total Devices: {devices.length}
+            </span>
+            <span className="text-sm text-gray-600 dark:text-gray-300 self-center">
+              Total Repairs: {totalRepairs}
             </span>
           </div>
         </CardHeader>
@@ -862,7 +949,20 @@ const RepairDashboard = () => {
                 placeholder="Brand"
                 value={newDevice.brand}
                 onChange={(e) => setNewDevice({ ...newDevice, brand: e.target.value })}
-              /> 
+              />
+              <select
+                value={newDevice.device_type || ''}
+                onChange={(e) => setNewDevice({ ...newDevice, device_type: e.target.value })}
+                className="border p-2 rounded dark:bg-gray-700"
+              >
+                <option value="">Select Type</option>
+                {[...new Set(devices
+                  .map(device => device.device_type)
+                  .filter(type => type && type.trim() !== '')
+                )].map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
               <Button onClick={handleAddDevice}>Save Device</Button>
             </div>
           )}

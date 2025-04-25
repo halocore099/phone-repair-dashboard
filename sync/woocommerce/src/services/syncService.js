@@ -5,100 +5,108 @@ const logger = require('../utils/logger');
 async function compareProducts(sqlProducts, wooProducts) {
   const newProducts = [];
   const updatedProducts = [];
+  const skuMap = {};
 
-  logger.debug('Comparing SQL and WooCommerce products...');
+  // Create SKU lookup map
+  wooProducts.forEach(p => {
+    if (p.sku) skuMap[p.sku] = p;
+  });
+
   for (const sqlProduct of sqlProducts) {
     if (!sqlProduct.sku) {
-      logger.warn(`Product missing SKU: ${sqlProduct.device_name} - ${sqlProduct.repair_type}`);
-      continue; // Skip products without SKU
+      logger.warn(`Skipping product without SKU: ${sqlProduct.device_name}`);
+      continue;
     }
 
-    const wooProduct = wooProducts.find((wp) => wp.sku === sqlProduct.sku);
+    const wooProduct = skuMap[sqlProduct.sku];
 
     if (!wooProduct) {
-      logger.debug(`New product detected: ${sqlProduct.sku}`);
       newProducts.push(sqlProduct);
-    } else if (
-      sqlProduct.device_name !== wooProduct.name ||
-      sqlProduct.price !== wooProduct.price
-    ) {
-      logger.debug(`Updated product detected: ${sqlProduct.sku}`);
-      updatedProducts.push({ ...sqlProduct, wooId: wooProduct.id });
+    } else {
+      const priceChanged = String(sqlProduct.price) !== String(wooProduct.price);
+      const nameChanged = sqlProduct.device_name !== wooProduct.name;
+      
+      if (priceChanged || nameChanged) {
+        updatedProducts.push({
+          ...sqlProduct,
+          wooId: wooProduct.id,
+          wooCurrentName: wooProduct.name
+        });
+      }
     }
   }
 
-  logger.debug(`Found ${newProducts.length} new products and ${updatedProducts.length} updated products.`);
+  logger.info(`Comparison results: ${newProducts.length} new, ${updatedProducts.length} updated`);
   return { newProducts, updatedProducts };
 }
 
-async function syncProducts() {
+async function syncProducts(limit = null) {
+  const startTime = Date.now();
+  logger.info(`Starting sync${limit ? ` (limit: ${limit})` : ''}...`);
+
   try {
-    logger.info('Starting sync process...');
+    // Fetch products in parallel
+    const [sqlProducts, wooProducts] = await Promise.all([
+      fetchProducts(limit).catch(() => []),
+      fetchWooCommerceProducts().catch(() => [])
+    ]);
 
-    // Fetch products from SQL and WooCommerce
-    logger.debug('Fetching products from SQL database...');
-    const sqlProducts = await fetchProducts();
-    logger.debug(`Fetched ${sqlProducts.length} products from SQL database.`);
+    if (!sqlProducts.length || !wooProducts.length) {
+      throw new Error(sqlProducts.length ? 'WooCommerce fetch failed' : 'SQL fetch failed');
+    }
 
-    logger.debug('Fetching products from WooCommerce...');
-    const wooProducts = await fetchWooCommerceProducts();
-    logger.debug(`Fetched ${wooProducts.length} products from WooCommerce.`);
+    const { newProducts, updatedProducts } = await compareProducts(sqlProducts, wooProducts);
+    const results = {
+      new: { count: 0, errors: 0 },
+      updated: { count: 0, errors: 0 }
+    };
 
-    // Compare products
-    logger.debug('Comparing SQL and WooCommerce products...');
-    const { newProducts, updatedProducts } = compareProducts(sqlProducts, wooProducts);
-    logger.debug(`Found ${newProducts.length} new products and ${updatedProducts.length} updated products.`);
-
-    // Create new products in WooCommerce
-    logger.info(`Creating ${newProducts.length} new products...`);
-    let createdCount = 0;
+    // Process new products
     for (const product of newProducts) {
       try {
-        const newProduct = {
-          name: `${product.device_name} - ${product.repair_type}`,
+        await createWooCommerceProduct({
+          name: `${product.device_name} - ${product.repair_type}`.substring(0, 120),
           sku: product.sku,
-          price: product.price.toString(),
-          stock_quantity: 10, // Default stock quantity
-        };
-        const createdProduct = await createWooCommerceProduct(newProduct);
-        logger.info(`Created Product ${createdCount + 1}:`, {
-          name: createdProduct.name,
-          id: createdProduct.id,
-          sku: createdProduct.sku,
-          price: createdProduct.price,
+          regular_price: product.price.toString(),
+          stock_quantity: 10
         });
-        createdCount++;
+        results.new.count++;
       } catch (err) {
-        logger.error(`Error creating product: ${product.sku}`, { error: err.message, stack: err.stack });
+        results.new.errors++;
       }
     }
 
-    // Update existing products in WooCommerce
-    logger.info(`Updating ${updatedProducts.length} products...`);
-    let updatedCount = 0;
+    // Process updates
     for (const product of updatedProducts) {
       try {
-        const updatedProduct = {
-          name: `${product.device_name} - ${product.repair_type}`,
-          price: product.price.toString(),
-        };
-        const result = await updateWooCommerceProduct(product.wooId, updatedProduct);
-        logger.info(` Updated Product ${updatedCount + 1}:`, {
-          name: result.name,
-          id: result.id,
-          sku: result.sku,
-          price: result.price,
+        await updateWooCommerceProduct(product.wooId, {
+          name: product.repair_type.substring(0, 120),
+          regular_price: product.price.toString()
         });
-        updatedCount++;
+        results.updated.count++;
       } catch (err) {
-        logger.error(`Error updating product: ${product.sku}`, { error: err.message, stack: err.stack });
+        results.updated.errors++;
       }
     }
 
-    // Log sync summary
-    logger.info(`Sync process completed. Created: ${createdCount}, Updated: ${updatedCount}, Skipped: ${newProducts.length - createdCount + updatedProducts.length - updatedCount}`);
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    logger.info(`Sync completed in ${duration}s`, { results });
+    
+    return {
+      success: true,
+      duration: `${duration}s`,
+      stats: results
+    };
+
   } catch (err) {
-    logger.error('Error during sync process:', { error: err.message, stack: err.stack });
+    logger.error('Sync failed:', {
+      error: err.message,
+      stack: err.stack
+    });
+    return { 
+      success: false, 
+      error: err.message 
+    };
   }
 }
 
