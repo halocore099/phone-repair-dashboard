@@ -1,19 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const https = require('https');
-const fs = require('fs');
 const { authenticate, authorize, hashPassword, comparePassword, generateToken, REGISTRATION_TOKEN } = require('./auth');
 require('dotenv').config();
+
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const options = {
-  key: fs.readFileSync('/var/www/clients/client1/web48/home/c334458admin/backend/key.pem'),
-  cert: fs.readFileSync('/var/www/clients/client1/web48/home/c334458admin/backend/cert.pem')
-};
 
 // Replace your current db connection with this:
 const db = mysql.createPool({
@@ -326,11 +322,9 @@ app.delete('/devices/:device_id/repairs/:repair_type_id', authenticate, authoriz
 });
 
 
-// Start the server
-const PORT = process.env.PORT || 3001;
-https.createServer(options, app).listen(PORT, () => {
-  console.log(`Server running on https://localhost:${PORT}`);
-});  
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
 
 
 app.get('/users', authenticate, authorize('Sudo'), (req, res) => {

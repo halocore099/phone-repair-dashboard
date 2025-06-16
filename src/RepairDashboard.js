@@ -13,7 +13,7 @@ const RepairDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [selectedDevices, setSelectedDevices] = useState([]);
-  const [newDevice, setNewDevice] = useState({ device_name: "", brand: "", device_type: ""});
+  const [newDevice, setNewDevice] = useState({ device_name: "", brand: "", device_type: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [username, setUsername] = useState('');
@@ -44,7 +44,7 @@ const RepairDashboard = () => {
     try {
 
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://k98j70.meinserver.io:3001/login', { username, password }, {
+      const response = await axios.post('https://k98j70.meinserver.io/login', { username, password }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       localStorage.setItem('token', response.data.token);
@@ -91,7 +91,7 @@ const RepairDashboard = () => {
         setIsLoggedIn(false);
         return;
       }
-      const response = await axios.get('https://k98j70.meinserver.io:3001/devices', {
+      const response = await axios.get('https://k98j70.meinserver.io/devices', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDevices(response.data);
@@ -126,7 +126,7 @@ const RepairDashboard = () => {
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
         const token = localStorage.getItem('token');
-        const repairResponse = await axios.get(`https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`, {
+        const repairResponse = await axios.get(`https://k98j70.meinserver.io/devices/${deviceId}/repairs`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         return repairResponse.data.map(repair => ({
@@ -167,7 +167,7 @@ const RepairDashboard = () => {
       selectedDevices.map(async (deviceId) => {
         const device = devices.find(d => d.device_id === deviceId);
         const token = localStorage.getItem('token');
-        const repairResponse = await axios.get(`https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs`, {
+        const repairResponse = await axios.get(`https://k98j70.meinserver.io/devices/${deviceId}/repairs`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         return repairResponse.data.map(repair => ({
@@ -195,7 +195,7 @@ const RepairDashboard = () => {
   const handleAddDevice = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://k98j70.meinserver.io:3001/devices',
+      const response = await axios.post('https://k98j70.meinserver.io/devices',
         newDevice,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -215,7 +215,7 @@ const RepairDashboard = () => {
     if (confirmDelete) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete('https://k98j70.meinserver.io:3001/devices/batch', {
+        await axios.delete('https://k98j70.meinserver.io/devices/batch', {
           headers: { Authorization: `Bearer ${token}` },
           data: { deviceIds: selectedDevices }
         });
@@ -233,7 +233,7 @@ const RepairDashboard = () => {
     if (confirmDelete) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`https://k98j70.meinserver.io:3001/devices/${deviceId}`, {
+        await axios.delete(`https://k98j70.meinserver.io/devices/${deviceId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         await loadDevices();
@@ -251,7 +251,7 @@ const RepairDashboard = () => {
       const fetchRepairs = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, {
+          const response = await axios.get(`https://k98j70.meinserver.io/devices/${device.device_id}/repairs`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setRepairs(response.data);
@@ -329,7 +329,7 @@ const RepairDashboard = () => {
       const fetchRepairTypes = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get('https://k98j70.meinserver.io:3001/repairtypes', {
+          const response = await axios.get('https://k98j70.meinserver.io/repairtypes', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setRepairTypes(response.data);
@@ -345,28 +345,12 @@ const RepairDashboard = () => {
       const fetchRepairs = async () => {
         try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`, {
+          const response = await axios.get(`https://k98j70.meinserver.io/devices/${device.device_id}/repairs`, {
             headers: { Authorization: `Bearer ${token}` }
           });
 
-          const processedRepairs = response.data.map(repair => {
-            let sku = repair.sku || "";
-            if (sku.startsWith("O-")) {
-              const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
-              const suffix = repairType?.code || "";
-              if (suffix && sku.endsWith(suffix)) {
-                sku = sku.substring(2, sku.length - suffix.length);
-              } else {
-                sku = sku.substring(2);
-              }
-            }
-            return {
-              ...repair,
-              sku: sku
-            };
-          });
-
-          setEditedRepairs(processedRepairs);
+          // Don't process the SKUs, just use them as they are
+          setEditedRepairs(response.data);
         } catch (error) {
           console.error('Error fetching repairs:', error);
         }
@@ -419,7 +403,7 @@ const RepairDashboard = () => {
       try {
         const token = localStorage.getItem('token');
         await axios.delete(
-          `https://k98j70.meinserver.io:3001/devices/${deviceId}/repairs/${repairTypeId}`,
+          `https://k98j70.meinserver.io/devices/${deviceId}/repairs/${repairTypeId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -439,20 +423,15 @@ const RepairDashboard = () => {
       try {
         const token = localStorage.getItem('token');
         const repairsToSave = editedRepairs.map(repair => {
-          const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
-          const skuPrefix = "O-";
-          const skuSuffix = repairType?.code || "";
-          const fullSku = `${skuPrefix}${repair.sku || ""}${skuSuffix}`;
-
           return {
             repair_type_id: repair.repair_type_id,
             price: repair.price,
-            sku: fullSku
+            sku: repair.sku || "" // Just use the SKU as entered, no prefix or suffix
           };
         });
 
         await axios.put(
-          `https://k98j70.meinserver.io:3001/devices/${device.device_id}/repairs`,
+          `https://k98j70.meinserver.io/devices/${device.device_id}/repairs`,
           { repairs: repairsToSave },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -494,10 +473,6 @@ const RepairDashboard = () => {
           {/* Scrollable repairs list */}
           <div className="flex-1 overflow-y-auto mb-4 pr-2">
             {editedRepairs.map((repair) => {
-              const repairType = repairTypes.find(rt => rt.repair_type_id === repair.repair_type_id);
-              const skuPrefix = "O-";
-              const skuSuffix = repairType?.code || "";
-
               return (
                 <div key={`${repair.repair_type_id}-${device.device_id}`} className="p-3 border rounded dark:border-gray-700 mb-2">
                   <div className="flex items-center gap-4">
@@ -525,9 +500,6 @@ const RepairDashboard = () => {
                       onChange={(e) => handleSKUChange(repair.repair_type_id, e.target.value)}
                       className="w-48"
                     />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {skuPrefix}{repair.sku || ""}{skuSuffix}
-                    </span>
                   </div>
                 </div>
               );
@@ -614,7 +586,7 @@ const RepairDashboard = () => {
     useEffect(() => {
       const fetchUsers = async () => {
         const token = localStorage.getItem('token');
-        const response = await axios.get('https://k98j70.meinserver.io:3001/users', {
+        const response = await axios.get('https://k98j70.meinserver.io/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUsers(response.data);
@@ -628,7 +600,7 @@ const RepairDashboard = () => {
         const registrationToken = process.env.REACT_APP_REGISTRATION_TOKEN;
 
         await axios.post(
-          'https://k98j70.meinserver.io:3001/register',
+          'https://k98j70.meinserver.io/register',
           {
             username: newUser.username,
             password: newUser.password,
@@ -638,7 +610,7 @@ const RepairDashboard = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        const response = await axios.get('https://k98j70.meinserver.io:3001/users', {
+        const response = await axios.get('https://k98j70.meinserver.io/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUsers(response.data);
@@ -651,7 +623,6 @@ const RepairDashboard = () => {
       }
     };
 
-
     const handleRoleChange = (userId, newRole) => {
       setChanges({ ...changes, [userId]: newRole });
     };
@@ -660,14 +631,13 @@ const RepairDashboard = () => {
       const token = localStorage.getItem('token');
       for (const [userId, role] of Object.entries(changes)) {
         await axios.put(
-          `https://k98j70.meinserver.io:3001/users/${userId}/role`,
+          `https://k98j70.meinserver.io/users/${userId}/role`,
           { role },
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
       onClose();
     };
-
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -688,22 +658,20 @@ const RepairDashboard = () => {
           </div>
 
           {showAddUser && (
-            <div className="mb-4 p-4 bord   er rounded-lg dark:border-gray-700">
+            <div className="mb-4 p-4 border rounded-lg dark:border-gray-700">
               <div className="grid grid-cols-3 gap-4">
                 <Input
                   type="text"
                   placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onKeyPress={handleLoginKeyPress}
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
                   className="w-full dark:bg-gray-700 dark:text-white"
                 />
                 <Input
                   type="password"
                   placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={handleLoginKeyPress}
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                   className="w-full dark:bg-gray-700 dark:text-white"
                 />
                 <select
@@ -762,20 +730,20 @@ const RepairDashboard = () => {
       </div>
     );
   };
-  
+
   const filteredDevices = devices.filter(device => {
     const deviceName = device.device_name ? device.device_name.toLowerCase() : '';
     const searchTermLower = searchTerm ? searchTerm.toLowerCase() : '';
     const deviceBrand = device.brand || '';
     const deviceType = device.device_type || '';
-    
+
     return (
       deviceName.includes(searchTermLower) &&
       (brandFilter ? deviceBrand === brandFilter : true) &&
       (deviceTypeFilter ? deviceType === deviceTypeFilter : true)
     );
   });
-  
+
 
   // Load Devices on Component Mount
   useEffect(() => {

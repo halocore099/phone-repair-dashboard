@@ -1,6 +1,12 @@
-const { fetchProducts } = require('./sqlService');
+const { fetchProducts, updateWooCommerceId } = require('./sqlService');
 const { fetchWooCommerceProducts, createWooCommerceProduct, updateWooCommerceProduct } = require('./wooService');
 const logger = require('../utils/logger');
+
+// Price normalization with better error handling
+const normalizePrice = (price) => {
+  const num = parseFloat(price);
+  return isNaN(num) ? '0.00' : num.toFixed(2);
+};
 
 async function compareProducts(sqlProducts, wooProducts) {
   const newProducts = [];
@@ -23,14 +29,29 @@ async function compareProducts(sqlProducts, wooProducts) {
     if (!wooProduct) {
       newProducts.push(sqlProduct);
     } else {
-      const priceChanged = String(sqlProduct.price) !== String(wooProduct.price);
-      const nameChanged = sqlProduct.device_name !== wooProduct.name;
+      // Compare prices and names
+      const normalizedSqlPrice = normalizePrice(sqlProduct.price);
+      const normalizedWooPrice = normalizePrice(wooProduct.regular_price || wooProduct.price);
       
+      const priceChanged = normalizedSqlPrice !== normalizedWooPrice;
+      const nameChanged = sqlProduct.device_name !== wooProduct.name;
+
+      // Detailed debug logging
+      logger.debug(`Comparing product ${sqlProduct.sku}:`, {
+        sqlPrice: sqlProduct.price,
+        wooPrice: wooProduct.regular_price || wooProduct.price,
+        normalizedSqlPrice,
+        normalizedWooPrice,
+        priceChanged,
+        nameChanged
+      });
+
       if (priceChanged || nameChanged) {
         updatedProducts.push({
           ...sqlProduct,
           wooId: wooProduct.id,
-          wooCurrentName: wooProduct.name
+          wooCurrentName: wooProduct.name,
+          wooCurrentPrice: wooProduct.regular_price || wooProduct.price
         });
       }
     }
@@ -41,9 +62,14 @@ async function compareProducts(sqlProducts, wooProducts) {
 }
 
 async function syncProducts(limit = null) {
-  const startTime = Date.now();
-  logger.info(`Starting sync${limit ? ` (limit: ${limit})` : ''}...`);
-
+  const results = {
+    total: 0,
+    updated: 0,
+    unchanged: 0,
+    failed: 0,
+    details: []
+  };
+  
   try {
     // Fetch products in parallel
     const [sqlProducts, wooProducts] = await Promise.all([
@@ -56,56 +82,126 @@ async function syncProducts(limit = null) {
     }
 
     const { newProducts, updatedProducts } = await compareProducts(sqlProducts, wooProducts);
-    const results = {
-      new: { count: 0, errors: 0 },
-      updated: { count: 0, errors: 0 }
-    };
-
+    
     // Process new products
     for (const product of newProducts) {
       try {
-        await createWooCommerceProduct({
+        const createdProduct = await createWooCommerceProduct({
           name: `${product.device_name} - ${product.repair_type}`.substring(0, 120),
           sku: product.sku,
           regular_price: product.price.toString(),
           stock_quantity: 10
         });
-        results.new.count++;
+        
+        // Store WooCommerce ID in database
+        await updateWooCommerceId(product.sku, createdProduct.id);
+        
+        results.details.push({
+          sku: product.sku,
+          id: createdProduct.id,
+          status: 'created',
+          timestamp: new Date().toISOString()
+        });
       } catch (err) {
-        results.new.errors++;
+        results.failed++;
+        results.details.push({
+          sku: product.sku,
+          status: 'failed',
+          operation: 'create',
+          error: err.message,
+          response: err.response?.data
+        });
       }
     }
-
+    
     // Process updates
     for (const product of updatedProducts) {
+      results.total++;
+      const productKey = `${product.sku}|${product.wooId}`;
+            
       try {
-        await updateWooCommerceProduct(product.wooId, {
-          name: product.repair_type.substring(0, 120),
+        logger.debug(`Processing update for ${productKey}`);
+        const updateData = {
+          name: `${product.device_name} - ${product.repair_type}`.substring(0, 120),
           regular_price: product.price.toString()
+        };
+        
+        // Pre-update debug
+        logger.debug(`Pre-update data for ${productKey}:`, {
+          sqlName: product.device_name,
+          wooName: product.wooCurrentName,
+          sqlPrice: product.price,
+          wooPrice: product.wooCurrentPrice,
+          updateData
         });
-        results.updated.count++;
+        
+        const result = await updateWooCommerceProduct(product.wooId, updateData);
+        
+        // Verify update
+        const wasUpdated = (
+          (updateData.name && result.name === updateData.name) ||
+          (updateData.regular_price && 
+           normalizePrice(result.regular_price) === normalizePrice(updateData.regular_price))
+        );
+        
+        if (wasUpdated) {
+          results.updated++;
+          results.details.push({
+            sku: product.sku,
+            id: product.wooId,
+            status: 'updated',
+            changes: Object.keys(updateData).filter(k => 
+              k === 'name' 
+                ? updateData[k] !== product.wooCurrentName
+                : normalizePrice(updateData[k]) !== normalizePrice(product.wooCurrentPrice)
+            ),
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          results.unchanged++;
+          results.details.push({
+            sku: product.sku,
+            id: product.wooId,
+            status: 'unchanged',
+            reason: 'No differences detected after update attempt',
+            details: {
+              nameMatch: updateData.name === result.name,
+              priceMatch: normalizePrice(updateData.regular_price) === normalizePrice(result.regular_price)
+            }
+          });
+        }
       } catch (err) {
-        results.updated.errors++;
+        results.failed++;
+        results.details.push({
+          sku: product.sku,
+          id: product.wooId,
+          status: 'failed',
+          error: err.message,
+          response: err.response?.data,
+          timestamp: new Date().toISOString()
+        });
       }
     }
-
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    logger.info(`Sync completed in ${duration}s`, { results });
     
+    logger.info('Sync completed with results:', {
+      stats: {
+        processed: results.total,
+        updated: results.updated,
+        unchanged: results.unchanged,
+        failed: results.failed
+      },
+      details: results.details
+    });
     return {
       success: true,
-      duration: `${duration}s`,
-      stats: results
+      ...results
     };
-
   } catch (err) {
-    logger.error('Sync failed:', {
+    logger.error('Sync failed:', err);
+    return {
+      success: false,
       error: err.message,
-      stack: err.stack
-    });
-    return { 
-      success: false, 
-      error: err.message 
+      ...results
     };
   }
 }
