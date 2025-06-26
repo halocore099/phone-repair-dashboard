@@ -581,6 +581,8 @@ const RepairDashboard = () => {
     const [changes, setChanges] = useState({});
     const [showAddUser, setShowAddUser] = useState(false);
     const [newUser, setNewUser] = useState({ username: '', password: '', role: 'Read' });
+    const [passwordResetUser, setPasswordResetUser] = useState(null);
+    const [newPassword, setNewPassword] = useState('');
     const roles = ['Read', 'Read&Write', 'Sudo'];
 
     useEffect(() => {
@@ -623,111 +625,241 @@ const RepairDashboard = () => {
       }
     };
 
+    const handleDeleteUser = async (userId, username) => {
+      const confirmDelete = window.confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`);
+      if (!confirmDelete) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`https://k98j70.meinserver.io/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // Refresh the users list
+        const response = await axios.get('https://k98j70.meinserver.io/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUsers(response.data);
+        
+        // Remove any pending changes for the deleted user
+        const updatedChanges = { ...changes };
+        delete updatedChanges[userId];
+        setChanges(updatedChanges);
+        
+        alert('User deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        if (error.response?.status === 400) {
+          alert(error.response.data.error || 'Cannot delete this user');
+        } else {
+          alert('Failed to delete user. Please try again.');
+        }
+      }
+    };
+
+    const handlePasswordReset = async () => {
+      if (!newPassword || newPassword.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        await axios.put(
+          `https://k98j70.meinserver.io/users/${passwordResetUser.id}/password`,
+          { newPassword },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setPasswordResetUser(null);
+        setNewPassword('');
+        alert('Password reset successfully!');
+      } catch (error) {
+        console.error('Error resetting password:', error);
+        alert('Failed to reset password. Please try again.');
+      }
+    };
+
     const handleRoleChange = (userId, newRole) => {
       setChanges({ ...changes, [userId]: newRole });
     };
 
     const handleSaveChanges = async () => {
-      const token = localStorage.getItem('token');
-      for (const [userId, role] of Object.entries(changes)) {
-        await axios.put(
-          `https://k98j70.meinserver.io/users/${userId}/role`,
-          { role },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      try {
+        const token = localStorage.getItem('token');
+        for (const [userId, role] of Object.entries(changes)) {
+          await axios.put(
+            `https://k98j70.meinserver.io/users/${userId}/role`,
+            { role },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        }
+        setChanges({});
+        alert('Role changes saved successfully!');
+        onClose();
+      } catch (error) {
+        console.error('Error saving changes:', error);
+        alert('Failed to save changes. Please try again.');
       }
-      onClose();
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Admin Panel - User Management</h2>
-            <Button variant="ghost" onClick={onClose}>×</Button>
-          </div>
+      <>
+        {/* Main Admin Modal */}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-5xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Admin Panel - User Management</h2>
+              <Button variant="ghost" onClick={onClose}>×</Button>
+            </div>
 
-          <div className="mb-4">
-            <Button
-              onClick={() => setShowAddUser(!showAddUser)}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              Add New User
-            </Button>
-          </div>
+            <div className="mb-4">
+              <Button
+                onClick={() => setShowAddUser(!showAddUser)}
+                className="flex items-center gap-2"
+              >
+                <Plus size={16} />
+                Add New User
+              </Button>
+            </div>
 
-          {showAddUser && (
-            <div className="mb-4 p-4 border rounded-lg dark:border-gray-700">
-              <div className="grid grid-cols-3 gap-4">
-                <Input
-                  type="text"
-                  placeholder="Username"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  className="w-full dark:bg-gray-700 dark:text-white"
-                />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  className="w-full dark:bg-gray-700 dark:text-white"
-                />
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                  className="border p-2 rounded dark:bg-gray-700"
-                >
-                  {roles.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
+            {showAddUser && (
+              <div className="mb-4 p-4 border rounded-lg dark:border-gray-700">
+                <div className="grid grid-cols-3 gap-4">
+                  <Input
+                    type="text"
+                    placeholder="Username"
+                    value={newUser.username}
+                    onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                    className="w-full dark:bg-gray-700 dark:text-white"
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    className="w-full dark:bg-gray-700 dark:text-white"
+                  />
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    className="border p-2 rounded dark:bg-gray-700"
+                  >
+                    {roles.map(role => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <Button onClick={handleAddUser}>Create User</Button>
+                </div>
               </div>
-              <div className="flex justify-end mt-4">
-                <Button onClick={handleAddUser}>Create User</Button>
+            )}
+
+            <div className="flex-1 overflow-hidden">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                    <tr>
+                      <th className="px-6 py-3 text-left">Username</th>
+                      <th className="px-6 py-3 text-left">Role</th>
+                      <th className="px-6 py-3 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div className="max-h-[400px] overflow-y-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-6 py-4">{user.username}</td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={changes[user.id] || user.role}
+                            onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                            className="border p-2 rounded dark:bg-gray-700"
+                          >
+                            {roles.map(role => (
+                              <option key={role} value={role}>{role}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPasswordResetUser(user)}
+                              className="flex items-center gap-2"
+                            >
+                              Reset Password
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id, user.username)}
+                              className="flex items-center gap-2"
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          )}
 
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
-                <tr>
-                  <th className="px-6 py-3 text-left">Username</th>
-                  <th className="px-6 py-3 text-left">Role</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4">{user.username}</td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={changes[user.id] || user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        className="border p-2 rounded dark:bg-gray-700"
-                      >
-                        {roles.map(role => (
-                          <option key={role} value={role}>{role}</option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSaveChanges}>Save Changes</Button>
+            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              {Object.keys(changes).length > 0 && (
+                <Button onClick={handleSaveChanges}>Save Role Changes</Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Password Reset Modal - Separate modal with higher z-index */}
+        {passwordResetUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[100]">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">Reset Password for {passwordResetUser.username}</h3>
+                <Button variant="ghost" onClick={() => {
+                  setPasswordResetUser(null);
+                  setNewPassword('');
+                }}>×</Button>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  type="password"
+                  placeholder="New Password (min 6 characters)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full dark:bg-gray-700 dark:text-white"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setPasswordResetUser(null);
+                      setNewPassword('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handlePasswordReset}>
+                    Reset Password
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   };
 

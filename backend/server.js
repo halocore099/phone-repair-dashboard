@@ -327,6 +327,7 @@ app.listen(PORT, () => {
 });
 
 
+// Get all users
 app.get('/users', authenticate, authorize('Sudo'), (req, res) => {
   const query = 'SELECT id, username, role FROM users';
   db.query(query, (err, results) => {
@@ -338,6 +339,7 @@ app.get('/users', authenticate, authorize('Sudo'), (req, res) => {
 });
 
 
+// Update user role
 app.put('/users/:userId/role', authenticate, authorize('Sudo'), (req, res) => {
   const { userId } = req.params;
   const { role } = req.body;
@@ -449,5 +451,58 @@ app.post('/repairtypes/batch', authenticate, authorize(['Read&Write', 'Sudo']), 
       message: `${result.affectedRows} repair types added successfully`,
       firstInsertId: result.insertId
     });
+  });
+});
+
+// Delete a user (NEW ENDPOINT - ADD THIS)
+app.delete('/users/:userId', authenticate, authorize('Sudo'), (req, res) => {
+  const { userId } = req.params;
+  
+  // Prevent deletion of the current user (optional safety check)
+  if (parseInt(userId) === req.user.id) {
+    return res.status(400).json({ error: 'Cannot delete your own account' });
+  }
+  
+  const query = 'DELETE FROM users WHERE id = ?';
+  db.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error('Error deleting user:', err);
+      return res.status(500).json({ error: 'Failed to delete user' });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ message: 'User deleted successfully' });
+  });
+});
+
+// Reset user password (protected route, requires Sudo role)
+app.put('/users/:userId/password', authenticate, authorize('Sudo'), (req, res) => {
+  const { userId } = req.params;
+  const { newPassword } = req.body;
+  
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+  
+  hashPassword(newPassword).then((hashedPassword) => {
+    const query = 'UPDATE users SET password_hash = ? WHERE id = ?';
+    db.query(query, [hashedPassword, userId], (err, result) => {
+      if (err) {
+        console.error('Error updating user password:', err);
+        return res.status(500).json({ error: 'Failed to update user password' });
+      }
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json({ message: 'Password updated successfully' });
+    });
+  }).catch((error) => {
+    console.error('Error hashing password:', error);
+    res.status(500).json({ error: 'Failed to process password' });
   });
 });
